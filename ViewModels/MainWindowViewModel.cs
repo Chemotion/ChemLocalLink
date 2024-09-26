@@ -163,7 +163,7 @@ public partial class
     if (File.Exists(selectedFile.FilePath))
       File.Delete(selectedFile.FilePath);
     DownloadedFiles.RemoveAt(SelectedDownloadedFileIndex);
-    var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "URL Handler");
+    var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ChemLocalLink");
     Directory.CreateDirectory(appDataPath);
     var jsonFilePath = Path.Combine(appDataPath, "downloads.json");
     if (File.Exists(jsonFilePath) && !string.IsNullOrEmpty(File.ReadAllText(jsonFilePath))) {

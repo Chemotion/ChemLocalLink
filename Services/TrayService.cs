@@ -56,7 +56,7 @@ public class TrayService : ITrayService {
         _notifyIcon = new TrayIcon {
             Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://urlhandler/Assets/icon.ico"))),
             IsVisible = true,
-            ToolTipText = "ChemotionURLHandler",
+            ToolTipText = "ChemLocalLink",
             Menu = _trayMenu
         };
 

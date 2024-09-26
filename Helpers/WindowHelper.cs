@@ -38,7 +38,7 @@ public static class WindowHelper {
 
     Task.Run(async () => {
       try {
-        var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "URL Handler");
+        var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ChemLocalLink");
         Directory.CreateDirectory(appDataPath);
         var filePath = Path.Combine(appDataPath, "downloads.json");
         Console.WriteLine($"Checking for file at path: {filePath}");

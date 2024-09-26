@@ -1,7 +1,7 @@
 #define public Dependency_Path_NetCoreCheck "dependencies\"
 #include "CodeDependencies.iss"
 
-#define AppName "URL-Handler"
+#define AppName "ChemLocalLink"
 #define AppVersion "1.0.2"
 #define Protocol "chemotion"
 
@@ -11,7 +11,7 @@ AppName={#AppName}
 AppPublisher=Scientifc Computing Center, KIT
 AppPublisherURL=https://www.scc.kit.edu/
 AppVersion={#AppVersion}
-AppComments=Chemotion-URL-Handler
+AppComments=ChemLocalLink
 AppContact=SDM, SCC, KIT
 AppCopyright=Copyright (C) 2024 KIT Scientific Computing Center (SCC)
 DefaultDirName={commonpf64}\{#AppName}
@@ -35,7 +35,7 @@ Source: "..\bin\Release\net8.0-windows10.0.17763.0\win-x64\publish\av_libglesv2.
 Source: "..\bin\Release\net8.0-windows10.0.17763.0\win-x64\publish\libHarfBuzzSharp.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\bin\Release\net8.0-windows10.0.17763.0\win-x64\publish\libSkiaSharp.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\bin\Release\net8.0-windows10.0.17763.0\win-x64\publish\libuv.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\bin\Release\net8.0-windows10.0.17763.0\win-x64\publish\URL-Handler.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\bin\Release\net8.0-windows10.0.17763.0\win-x64\publish\ChemLocalLink.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name:"{group}\{#AppName}"; Filename:"{app}\{#AppName}.exe";WorkingDir:{app}

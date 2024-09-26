@@ -2,7 +2,7 @@ using System;
 using System.IO;
 
 public static class Theme {
-  private static string settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "URL Handler", "theme.txt");
+  private static string settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ChemLocalLink", "theme.txt");
 
   public static void SaveCurrentTheme(bool isDarkMode) {
     var directory = Path.GetDirectoryName(settingsFilePath);

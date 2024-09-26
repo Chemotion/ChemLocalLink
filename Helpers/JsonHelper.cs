@@ -29,7 +29,7 @@ public static class JsonHelper {
 
   public static async void WriteDataToAppData() {
     var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-      "URL Handler");
+      "ChemLocalLink");
     Directory.CreateDirectory(appDataPath);
     var jsonFilePath = Path.Combine(appDataPath, "downloads.json");
     var data = JsonConvert.SerializeObject(WindowHelper.MainWindowViewModel!.DownloadedFiles);

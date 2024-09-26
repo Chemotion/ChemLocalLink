@@ -1,6 +1,6 @@
 [DEBREATE-0.8-dev9]
 <<CTRL>>
-Package: urlhandler
+Package: ChemLocalLink
 Version: 0.3
 Maintainer: mekkyz <mos.mekky@gmail.com>
 Section: utils
@@ -8,60 +8,60 @@ Homepage: https://www.scc.kit.edu/
 Architecture: amd64
 Priority: optional
 Pre-Depends: dotnet8 (>=8.0.4)
-Description: Chemotion URL Handler
- URL Handler is a cross-platform application designed to manage and process URLs specifically tailored for Chemotion interfaces.
+Description: ChemLocalLink
+ ChemLocalLink is a cross-platform desktop application designed to manage and process URLs specifically tailored for Chemotion interfaces.
 <</CTRL>>
 <<FILES>>
 1
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.Base.dll -> Avalonia.Base.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.Controls.dll -> Avalonia.Controls.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.DesignerSupport.dll -> Avalonia.DesignerSupport.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.Desktop.dll -> Avalonia.Desktop.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.Dialogs.dll -> Avalonia.Dialogs.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.Fonts.Inter.dll -> Avalonia.Fonts.Inter.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.FreeDesktop.dll -> Avalonia.FreeDesktop.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.Markup.Xaml.dll -> Avalonia.Markup.Xaml.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.Markup.dll -> Avalonia.Markup.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.Metal.dll -> Avalonia.Metal.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.MicroCom.dll -> Avalonia.MicroCom.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.Native.dll -> Avalonia.Native.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.OpenGL.dll -> Avalonia.OpenGL.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.Remote.Protocol.dll -> Avalonia.Remote.Protocol.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.Skia.dll -> Avalonia.Skia.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.Themes.Fluent.dll -> Avalonia.Themes.Fluent.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.Win32.dll -> Avalonia.Win32.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.X11.dll -> Avalonia.X11.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Avalonia.dll -> Avalonia.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/ColorTextBlock.Avalonia.dll -> ColorTextBlock.Avalonia.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/CommunityToolkit.Mvvm.dll -> CommunityToolkit.Mvvm.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/DesktopNotifications.Avalonia.dll -> DesktopNotifications.Avalonia.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/DesktopNotifications.FreeDesktop.dll -> DesktopNotifications.FreeDesktop.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/DesktopNotifications.Windows.dll -> DesktopNotifications.Windows.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/DesktopNotifications.dll -> DesktopNotifications.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/DialogHost.Avalonia.dll -> DialogHost.Avalonia.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/HarfBuzzSharp.dll -> HarfBuzzSharp.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Markdown.Avalonia.dll -> Markdown.Avalonia.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/MicroCom.Runtime.dll -> MicroCom.Runtime.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Microsoft.Toolkit.Uwp.Notifications.dll -> Microsoft.Toolkit.Uwp.Notifications.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Microsoft.Win32.SystemEvents.dll -> Microsoft.Win32.SystemEvents.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/MsBox.Avalonia.dll -> MsBox.Avalonia.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Projektanker.Icons.Avalonia.FontAwesome.dll -> Projektanker.Icons.Avalonia.FontAwesome.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Projektanker.Icons.Avalonia.dll -> Projektanker.Icons.Avalonia.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/RestSharp.dll -> RestSharp.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/SkiaSharp.dll -> SkiaSharp.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/System.Drawing.Common.dll -> System.Drawing.Common.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/System.IO.Pipelines.dll -> System.IO.Pipelines.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/System.Reactive.dll -> System.Reactive.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Tmds.DBus.Protocol.dll -> Tmds.DBus.Protocol.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/Tmds.DBus.dll -> Tmds.DBus.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/icon.ico -> icon.ico -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/libHarfBuzzSharp.so -> libHarfBuzzSharp.so -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/libSkiaSharp.so -> libSkiaSharp.so -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/logo.png -> logo.png -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/urlhandler* -> urlhandler -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/urlhandler.deps.json -> urlhandler.deps.json -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/urlhandler.dll -> urlhandler.dll -> /usr/lib
-/home/mostafa/Desktop/uh/urlhandler/urlhandler.runtimeconfig.json -> urlhandler.runtimeconfig.json -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.Base.dll -> Avalonia.Base.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.Controls.dll -> Avalonia.Controls.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.DesignerSupport.dll -> Avalonia.DesignerSupport.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.Desktop.dll -> Avalonia.Desktop.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.Dialogs.dll -> Avalonia.Dialogs.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.Fonts.Inter.dll -> Avalonia.Fonts.Inter.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.FreeDesktop.dll -> Avalonia.FreeDesktop.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.Markup.Xaml.dll -> Avalonia.Markup.Xaml.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.Markup.dll -> Avalonia.Markup.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.Metal.dll -> Avalonia.Metal.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.MicroCom.dll -> Avalonia.MicroCom.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.Native.dll -> Avalonia.Native.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.OpenGL.dll -> Avalonia.OpenGL.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.Remote.Protocol.dll -> Avalonia.Remote.Protocol.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.Skia.dll -> Avalonia.Skia.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.Themes.Fluent.dll -> Avalonia.Themes.Fluent.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.Win32.dll -> Avalonia.Win32.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.X11.dll -> Avalonia.X11.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Avalonia.dll -> Avalonia.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/ColorTextBlock.Avalonia.dll -> ColorTextBlock.Avalonia.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/CommunityToolkit.Mvvm.dll -> CommunityToolkit.Mvvm.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/DesktopNotifications.Avalonia.dll -> DesktopNotifications.Avalonia.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/DesktopNotifications.FreeDesktop.dll -> DesktopNotifications.FreeDesktop.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/DesktopNotifications.Windows.dll -> DesktopNotifications.Windows.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/DesktopNotifications.dll -> DesktopNotifications.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/DialogHost.Avalonia.dll -> DialogHost.Avalonia.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/HarfBuzzSharp.dll -> HarfBuzzSharp.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Markdown.Avalonia.dll -> Markdown.Avalonia.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/MicroCom.Runtime.dll -> MicroCom.Runtime.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Microsoft.Toolkit.Uwp.Notifications.dll -> Microsoft.Toolkit.Uwp.Notifications.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Microsoft.Win32.SystemEvents.dll -> Microsoft.Win32.SystemEvents.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/MsBox.Avalonia.dll -> MsBox.Avalonia.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Projektanker.Icons.Avalonia.FontAwesome.dll -> Projektanker.Icons.Avalonia.FontAwesome.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Projektanker.Icons.Avalonia.dll -> Projektanker.Icons.Avalonia.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/RestSharp.dll -> RestSharp.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/SkiaSharp.dll -> SkiaSharp.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/System.Drawing.Common.dll -> System.Drawing.Common.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/System.IO.Pipelines.dll -> System.IO.Pipelines.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/System.Reactive.dll -> System.Reactive.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Tmds.DBus.Protocol.dll -> Tmds.DBus.Protocol.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/Tmds.DBus.dll -> Tmds.DBus.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/icon.ico -> icon.ico -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/libHarfBuzzSharp.so -> libHarfBuzzSharp.so -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/libSkiaSharp.so -> libSkiaSharp.so -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/logo.png -> logo.png -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/ChemLocalLink* -> ChemLocalLink -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/ChemLocalLink.deps.json -> ChemLocalLink.deps.json -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/ChemLocalLink.dll -> ChemLocalLink.dll -> /usr/lib
+/home/mostafa/Desktop/uh/ChemLocalLink/ChemLocalLink.runtimeconfig.json -> ChemLocalLink.runtimeconfig.json -> /usr/lib
 <</FILES>>
 <<SCRIPTS>>
 <<PREINST>>
@@ -72,10 +72,10 @@ Description: Chemotion URL Handler
 1
 #!/bin/bash -e
 
-ln -fs "/usr/lib/urlhandler" "/usr/bin/urlhandler"
+ln -fs "/usr/lib/ChemLocalLink" "/usr/bin/ChemLocalLink"
 
 PROTOCOL="chemotion"
-HANDLER_PATH="/usr/lib/urlhandler"
+HANDLER_PATH="/usr/lib/ChemLocalLink"
 DESKTOP_FILE="/usr/share/applications/${PROTOCOL}-handler.desktop"
 
 sudo bash -c "cat << EOF > '$DESKTOP_FILE'
@@ -95,7 +95,7 @@ echo "Protocol '${PROTOCOL}' has been associated with '${HANDLER_PATH}' system-w
 1
 #!/bin/bash -e
 
-rm -f "/usr/bin/urlhandler"
+rm -f "/usr/bin/ChemLocalLink"
 <</PRERM>>
 <<POSTRM>>
 0
@@ -131,9 +131,9 @@ SOFTWARE.
 <</COPYRIGHT>>
 <<MENU>>
 1
-Name=URL Handler
+Name=ChemLocalLink
 Version=1.0
-Exec=/usr/lib/urlhandler
+Exec=/usr/lib/ChemLocalLink
 Icon=/usr/lib/icon.ico
 Type=Application
 Terminal=true

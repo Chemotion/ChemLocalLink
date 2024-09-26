@@ -54,7 +54,7 @@ internal class FileService : IFileService {
 
         File.SetCreationTime(filePath, DateTime.Now);
 
-        var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "URL Handler");
+        var appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ChemLocalLink");
         Directory.CreateDirectory(appDataPath);
         var jsonFilePath = Path.Combine(appDataPath, "downloads.json");
 

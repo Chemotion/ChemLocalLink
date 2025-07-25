@@ -4,9 +4,10 @@ using Avalonia.Markup.Xaml;
 
 namespace urlhandler.UserControls;
 
-public partial class Downloads : UserControl {
-  public Downloads() {
+public partial class Downloads : UserControl
+{
+  public Downloads()
+  {
     InitializeComponent();
   }
 }
-

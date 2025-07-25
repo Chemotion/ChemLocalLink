@@ -1,6 +1,5 @@
 bin/
 obj/
 .testapi/
-.config/
 .vs/
 .idea/

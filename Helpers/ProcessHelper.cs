@@ -7,25 +7,32 @@ using urlhandler.ViewModels;
 
 namespace urlhandler.Helpers;
 
-internal abstract class ProcessHelper {
-  public static async Task HandleProcess(MainWindowViewModel mainWindowView, string _url) {
-    try {
-      if (mainWindowView.IsAlreadyProcessing == false) {
-
-        if (!Uri.TryCreate(mainWindowView.Url, UriKind.Absolute, out _)) {
+internal abstract class ProcessHelper
+{
+  public static async Task HandleProcess(MainWindowViewModel mainWindowView, string _url)
+  {
+    try
+    {
+      if (mainWindowView.IsAlreadyProcessing == false)
+      {
+        if (!Uri.TryCreate(mainWindowView.Url, UriKind.Absolute, out _))
+        {
           mainWindowView.Status = FeedbackHelper.InvalidUrl;
           await FeedbackHelper.ShowNotificationAsync(mainWindowView.Status, mainWindowView);
 
           return;
         }
 
-        if (mainWindowView.Url.ToLower().Contains("url=")) {
+        if (mainWindowView.Url.ToLower().Contains("url="))
+        {
           var uri = new Uri(mainWindowView.Url);
           string? parm = HttpUtility.ParseQueryString(uri.Query).Get("url");
-          if (!string.IsNullOrEmpty(parm)) {
+          if (!string.IsNullOrEmpty(parm))
+          {
             mainWindowView.Url = parm;
             _url = parm;
-            if (mainWindowView.Url != _url) {
+            if (mainWindowView.Url != _url)
+            {
               mainWindowView.SelectedUrl = _url;
               mainWindowView.Url = _url;
             }
@@ -37,29 +44,34 @@ internal abstract class ProcessHelper {
         var token = _url.ExtractAuthToken();
         var downloadedFile = await mainWindowView._downloadService.DownloadFile(mainWindowView, token!);
         mainWindowView._filePath = downloadedFile?.filePath ?? null;
-        if (mainWindowView._filePath == null) {
+        if (mainWindowView._filePath == null)
+        {
           mainWindowView.Status = FeedbackHelper.DownloadFail;
           await FeedbackHelper.ShowNotificationAsync(mainWindowView.Status, mainWindowView);
           return;
         }
 
-        await mainWindowView._fileService.ProcessFile(mainWindowView._filePath, mainWindowView, downloadedFile?.originalName ?? "");
+        await mainWindowView._fileService.ProcessFile(
+          mainWindowView._filePath,
+          mainWindowView,
+          downloadedFile?.originalName ?? ""
+        );
         mainWindowView.Status = FeedbackHelper.DownloadSuccessful;
         await FeedbackHelper.ShowNotificationAsync(mainWindowView.Status, mainWindowView);
-
       }
-      else {
+      else
+      {
         mainWindowView.Status = FeedbackHelper.FileAccessError;
         await FeedbackHelper.ShowNotificationAsync(mainWindowView.Status, mainWindowView);
       }
     }
-
-    catch (HttpRequestException) {
+    catch (HttpRequestException)
+    {
       mainWindowView.Status = FeedbackHelper.NetworkError;
       await FeedbackHelper.ShowNotificationAsync(mainWindowView.Status, mainWindowView);
     }
-
-    catch (Exception ex) {
+    catch (Exception ex)
+    {
       Console.WriteLine($"Error in Process method: {ex.Message}");
       throw;
     }

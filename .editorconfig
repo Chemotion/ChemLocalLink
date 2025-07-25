@@ -13,6 +13,11 @@ space_around_operators = true
 csharp_new_line_before_open_brace = none
 csharp_indent_case_contents = true
 csharp_language_version = latest
+csharp_preserve_single_line_statements = true
+csharp_preserve_single_line_blocks = true
+indent_style = space
+indent_size = 2
+
 
 [*.{xml,xaml,axaml}]
 xml.attribute.new_line = true

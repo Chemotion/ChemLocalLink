@@ -7,46 +7,61 @@ using urlhandler.ViewModels;
 
 namespace urlhandler.Services;
 
-internal interface ITokenService {
+internal interface ITokenService
+{
   Task FetchAuthToken(MainWindowViewModel mainWindowView);
   JwtPayload GetTokenParameters(string token);
 }
-internal class TokenService : ITokenService {
-  public async Task FetchAuthToken(MainWindowViewModel mainWindowView) {
-    try {
-      var tokenParameters = GetTokenParameters(mainWindowView.Url!);
-      if (true) {
-        var response = await mainWindowView._httpClient.GetAsync(ApiHelper.TokenUrl(tokenParameters["attID"].ToString(), tokenParameters["appID"].ToString()));
 
-        if (response.IsSuccessStatusCode) {
+internal class TokenService : ITokenService
+{
+  public async Task FetchAuthToken(MainWindowViewModel mainWindowView)
+  {
+    try
+    {
+      var tokenParameters = GetTokenParameters(mainWindowView.Url!);
+      if (true)
+      {
+        var response = await mainWindowView._httpClient.GetAsync(
+          ApiHelper.TokenUrl(tokenParameters["attID"].ToString(), tokenParameters["appID"].ToString())
+        );
+
+        if (response.IsSuccessStatusCode)
+        {
           var content = await response.Content.ReadAsStringAsync();
 
-          if (!string.IsNullOrEmpty(content)) {
+          if (!string.IsNullOrEmpty(content))
+          {
             mainWindowView.AuthToken = content;
           }
-          else {
+          else
+          {
             throw new InvalidOperationException("Failed to parse auth token from response content.");
           }
         }
-        else {
+        else
+        {
           throw new HttpRequestException($"Failed to fetch auth token. Status code: {response.StatusCode}");
         }
       }
     }
-
-    catch (HttpRequestException ex) {
+    catch (HttpRequestException ex)
+    {
       Console.WriteLine($"Error fetching auth token: {ex.Message}");
       throw;
     }
-
-    catch (Exception ex) {
+    catch (Exception ex)
+    {
       Console.WriteLine($"Error fetching auth token: {ex.Message}");
       throw;
     }
   }
 
-  public JwtPayload GetTokenParameters(string url) {
+  public JwtPayload GetTokenParameters(string url)
+  {
     var handler = new JwtSecurityTokenHandler();
-    return handler.ReadToken(url[(url.LastIndexOf('/') + 1)..]) is not JwtSecurityToken jsonToken ? [] : jsonToken.Payload;
+    return handler.ReadToken(url[(url.LastIndexOf('/') + 1)..]) is not JwtSecurityToken jsonToken
+      ? []
+      : jsonToken.Payload;
   }
 }

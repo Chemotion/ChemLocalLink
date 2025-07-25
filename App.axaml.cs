@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Markup.Xaml;
+using urlhandler.Helpers;
+using urlhandler.ViewModels;
+using urlhandler.Views;
 
 namespace urlhandler;
 

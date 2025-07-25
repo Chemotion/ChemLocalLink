@@ -1,3 +1,6 @@
+using System;
+using Avalonia.Data.Converters;
+
 namespace urlhandler.Converters;
 
 public class IndexToBooleanConverter : IValueConverter

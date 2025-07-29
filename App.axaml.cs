@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using urlhandler.DependencyInjection;
 using urlhandler.Helpers;
 using urlhandler.ViewModels;
 using urlhandler.Views;
@@ -21,8 +22,11 @@ public class App : Application
     if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
     {
       var mw = new MainWindow();
-      WindowHelper.MainWindowViewModel = new MainWindowViewModel(mw, desktop.Args ?? []);
-      mw.DataContext = WindowHelper.MainWindowViewModel;
+      var viewModel = ServiceLocator.GetService<MainWindowViewModel>();
+      viewModel.Initialize(mw, desktop.Args ?? []);
+
+      WindowHelper.MainWindowViewModel = viewModel;
+      mw.DataContext = viewModel;
       desktop.Startup += DesktopOnStartup;
       desktop.MainWindow = mw;
       desktop.MainWindow.DataContext = mw.DataContext;

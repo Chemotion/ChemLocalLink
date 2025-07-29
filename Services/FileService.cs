@@ -10,7 +10,7 @@ using urlhandler.ViewModels;
 
 namespace urlhandler.Services;
 
-internal interface IFileService
+public interface IFileService
 {
   Task ProcessFile(string? filePath, MainWindowViewModel mainWindowView, string originalName);
 }

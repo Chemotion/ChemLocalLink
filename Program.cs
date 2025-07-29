@@ -2,17 +2,26 @@
 using System.Diagnostics;
 using Avalonia;
 using DesktopNotifications;
+using Microsoft.Extensions.DependencyInjection;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.FontAwesome;
+using urlhandler.DependencyInjection;
 
 namespace urlhandler;
 
 internal class Program
 {
   public static INotificationManager NotificationManager = null!;
+  public static IServiceProvider ServiceProvider = null!;
 
   private static void Main(string[] args)
   {
+    // setup DI container
+    var services = new ServiceCollection();
+    services.AddApplicationServices();
+    ServiceProvider = services.BuildServiceProvider();
+    ServiceLocator.Initialize(ServiceProvider);
+
     BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
   }
 

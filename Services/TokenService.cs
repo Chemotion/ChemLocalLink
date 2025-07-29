@@ -7,7 +7,7 @@ using urlhandler.ViewModels;
 
 namespace urlhandler.Services;
 
-internal interface ITokenService
+public interface ITokenService
 {
   Task FetchAuthToken(MainWindowViewModel mainWindowView);
   JwtPayload GetTokenParameters(string token);
@@ -15,6 +15,13 @@ internal interface ITokenService
 
 internal class TokenService : ITokenService
 {
+  private readonly HttpClient _httpClient;
+
+  public TokenService(HttpClient httpClient)
+  {
+    _httpClient = httpClient;
+  }
+
   public async Task FetchAuthToken(MainWindowViewModel mainWindowView)
   {
     try
@@ -22,7 +29,7 @@ internal class TokenService : ITokenService
       var tokenParameters = GetTokenParameters(mainWindowView.Url!);
       if (true)
       {
-        var response = await mainWindowView._httpClient.GetAsync(
+        var response = await _httpClient.GetAsync(
           ApiHelper.TokenUrl(tokenParameters["attID"].ToString(), tokenParameters["appID"].ToString())
         );
 

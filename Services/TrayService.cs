@@ -33,8 +33,11 @@ public class TrayService : ITrayService
         {
           Dispatcher.UIThread.Invoke(() =>
           {
-            _mainWindowViewModel!.mainWindow.WindowState = WindowState.Normal;
-            _mainWindowViewModel.mainWindow.ShowInTaskbar = true;
+            if (_mainWindowViewModel?.mainWindow != null)
+            {
+              _mainWindowViewModel.mainWindow.WindowState = WindowState.Normal;
+              _mainWindowViewModel.mainWindow.ShowInTaskbar = true;
+            }
           });
         }),
       },

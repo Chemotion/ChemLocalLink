@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using urlhandler.Extensions;
 using urlhandler.Helpers;
@@ -10,13 +11,20 @@ using urlhandler.ViewModels;
 
 namespace urlhandler.Services;
 
-internal interface IDownloadService
+public interface IDownloadService
 {
   Task<(string filePath, string originalName)?> DownloadFile(MainWindowViewModel mainWindowView, string token);
 }
 
 internal class DownloadService : IDownloadService
 {
+  private readonly HttpClient _httpClient;
+
+  public DownloadService(HttpClient httpClient)
+  {
+    _httpClient = httpClient;
+  }
+
   public async Task<(string filePath, string originalName)?> DownloadFile(
     MainWindowViewModel mainWindowView,
     string authToken
@@ -36,7 +44,7 @@ internal class DownloadService : IDownloadService
           $"Downloaded {progressInfo.BytesRead.FormatBytes()} out of {progressInfo.TotalBytesExpected?.FormatBytes() ?? "0"}.";
       });
 
-      var (response, fileContentBytes) = await mainWindowView._httpClient.GetWithProgressAsync(downloadUrl, progress);
+      var (response, fileContentBytes) = await _httpClient.GetWithProgressAsync(downloadUrl, progress);
       var headers = response.Content.Headers;
 
       var _headers = headers.ToImmutableDictionary();

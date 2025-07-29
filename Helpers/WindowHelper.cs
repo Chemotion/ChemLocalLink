@@ -1,13 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using Newtonsoft.Json;
+using urlhandler.DependencyInjection;
 using urlhandler.Extensions;
 using urlhandler.Models;
 using urlhandler.Services;
@@ -24,7 +31,8 @@ public static class WindowHelper
   public static void Deactivate(MainWindowViewModel mainWindowView)
   {
     var minimized = mainWindowView is { isMinimizedByIdleTimer: false, mainWindow.WindowState: WindowState.Minimized };
-    mainWindowView.mainWindow.ShowInTaskbar = !minimized;
+    if (mainWindowView.mainWindow != null)
+      mainWindowView.mainWindow.ShowInTaskbar = !minimized;
     mainWindowView.isMinimizedByIdleTimer = minimized;
     if (mainWindowView.idleTimer == null)
       return;
@@ -37,7 +45,8 @@ public static class WindowHelper
 
   public static void Load(MainWindowViewModel mainWindowView)
   {
-    new TrayService().InitializeTray(mainWindowView);
+    var trayService = ServiceLocator.GetService<ITrayService>();
+    trayService.InitializeTray(mainWindowView);
     if (
       Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major >= 10
       || Environment.OSVersion.Platform == PlatformID.Unix
@@ -92,7 +101,7 @@ public static class WindowHelper
           Console.WriteLine("File does not exist or is empty");
         }
 
-        if (mainWindowView.args.Length > 0)
+        if (mainWindowView.args?.Length > 0)
         {
           var parsedUrl = mainWindowView.args.First().ParseUrl();
           if (parsedUrl == null || parsedUrl == "invalid uri")
@@ -163,8 +172,11 @@ public static class WindowHelper
       return;
     }
 
-    mainWindowView.mainWindow.WindowState = WindowState.Normal;
-    mainWindowView.mainWindow.ShowInTaskbar = true;
+    if (mainWindowView.mainWindow != null)
+    {
+      mainWindowView.mainWindow.WindowState = WindowState.Normal;
+      mainWindowView.mainWindow.ShowInTaskbar = true;
+    }
     mainWindowView.isMinimizedByIdleTimer = false;
 
     if (mainWindowView.idleTimer != null)

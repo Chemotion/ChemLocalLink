@@ -25,17 +25,19 @@ namespace urlhandler.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-  internal readonly HttpClient _httpClient = new HttpClient();
+  internal readonly HttpClient _httpClient;
   internal string? _filePath;
   internal INotificationManager? notificationManager;
   internal readonly DispatcherTimer? idleTimer = new DispatcherTimer();
   internal DateTime lastInteractionTime;
   internal bool isMinimizedByIdleTimer = false;
-  internal readonly MainWindow mainWindow;
-  internal readonly string[] args;
-  internal readonly DownloadService _downloadService;
-  internal readonly UploadService _uploadService;
-  internal readonly FileService _fileService;
+  internal MainWindow? mainWindow;
+  internal string[]? args;
+  internal readonly IDownloadService _downloadService;
+  internal readonly IUploadService _uploadService;
+  internal readonly IFileService _fileService;
+  internal readonly ITokenService _tokenService;
+  internal readonly ITrayService _trayService;
   internal Process? _fileProcess;
 
   [ObservableProperty]
@@ -99,23 +101,40 @@ public partial class MainWindowViewModel : ObservableObject
     Theme.SaveCurrentTheme(value);
   }
 
-  public MainWindowViewModel(MainWindow mainWindow, string[] args)
+  public MainWindowViewModel(
+    HttpClient httpClient,
+    IDownloadService downloadService,
+    IUploadService uploadService,
+    IFileService fileService,
+    ITokenService tokenService,
+    ITrayService trayService
+  )
+  {
+    _httpClient = httpClient;
+    _downloadService = downloadService;
+    _uploadService = uploadService;
+    _fileService = fileService;
+    _tokenService = tokenService;
+    _trayService = trayService;
+
+    IsDarkMode = Theme.LoadCurrentTheme();
+    Process = new RelayCommand<Task>(_ => Task.Run(async () => await ProcessCommand()));
+  }
+
+  public void Initialize(MainWindow mainWindow, string[] args)
   {
     this.mainWindow = mainWindow;
-    IsDarkMode = Theme.LoadCurrentTheme();
     this.args = args ?? throw new ArgumentNullException(nameof(args));
-
-    _downloadService = new DownloadService();
-    _uploadService = new UploadService();
-    _fileService = new FileService();
-    Process = new RelayCommand<Task>(_ => Task.Run(async () => await ProcessCommand()));
     SetupEventHandlers();
   }
 
   private void SetupEventHandlers()
   {
-    mainWindow.Loaded += MainWindow_Loaded;
-    mainWindow.Deactivated += (s, e) => WindowHelper.Deactivate(this);
+    if (mainWindow != null)
+    {
+      mainWindow.Loaded += MainWindow_Loaded;
+      mainWindow.Deactivated += (s, e) => WindowHelper.Deactivate(this);
+    }
   }
 
   private void MainWindow_Loaded(object? sender, EventArgs e)
@@ -208,7 +227,7 @@ public partial class MainWindowViewModel : ObservableObject
   public async Task ProcessCommand() => await ProcessHelper.HandleProcess(this, Url!);
 
   [RelayCommand]
-  public async Task<bool> UploadFiles(string role) => await new UploadService().UploadEditedFiles(role);
+  public async Task<bool> UploadFiles(string role) => await _uploadService.UploadEditedFiles(role);
 
   [RelayCommand]
   public void DeleteSelectedFile()

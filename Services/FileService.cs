@@ -17,17 +17,24 @@ public interface IFileService
 
 internal class FileService : IFileService
 {
+  private readonly ITokenService _tokenService;
+
+  public FileService(ITokenService tokenService)
+  {
+    _tokenService = tokenService;
+  }
+
   public Task ProcessFile(string? filePath, MainWindowViewModel mainWindowView, string originalName)
   {
     try
     {
       if (filePath == null)
         return Task.CompletedTask;
-      WindowHelper.MainWindowViewModel?._fileProcess?.Dispose();
+      mainWindowView?._fileProcess?.Dispose();
 
-      if (WindowHelper.MainWindowViewModel != null)
+      if (mainWindowView != null)
       {
-        WindowHelper.MainWindowViewModel._fileProcess = new Process
+        mainWindowView._fileProcess = new Process
         {
           StartInfo = new ProcessStartInfo(filePath) { UseShellExecute = true },
         };
@@ -37,14 +44,14 @@ internal class FileService : IFileService
         throw new InvalidOperationException("MainWindowViewModel is not initialized.");
       }
 
-      WindowHelper.MainWindowViewModel._fileProcess.Start();
+      mainWindowView._fileProcess.Start();
 
       var random = new Random(2345);
 
       {
         var id =
-          WindowHelper.MainWindowViewModel.DownloadedFiles?.Any() ?? false
-            ? WindowHelper.MainWindowViewModel.DownloadedFiles.Max(f => f.FileId) + 1
+          mainWindowView.DownloadedFiles?.Any() ?? false
+            ? mainWindowView.DownloadedFiles.Max(f => f.FileId) + 1
             : random.NextInt64(10000, 999999);
 
         var download = new Downloads()
@@ -57,7 +64,7 @@ internal class FileService : IFileService
           FileSize = new FileInfo(filePath).Length.FormatBytes(),
           FileDownloadTimeStamp = File.GetLastWriteTime(filePath),
           IsEdited = false,
-          Exp = ApiHelper.TokenExp(mainWindowView.Url!),
+          Exp = _tokenService.TokenExp(mainWindowView.Url!),
         };
 
         File.SetCreationTime(filePath, DateTime.Now);
@@ -79,15 +86,18 @@ internal class FileService : IFileService
           FileSize = new FileInfo(filePath).Length.FormatBytes(),
           FileDownloadTimeStamp = File.GetLastWriteTime(filePath),
           IsEdited = false,
-          Exp = ApiHelper.TokenExp(mainWindowView.Url!),
+          Exp = _tokenService.TokenExp(mainWindowView.Url!),
         };
 
         JsonHelper.AppendJsonToFile(jsonFilePath, jsonObject);
 
-        WindowHelper.MainWindowViewModel.DownloadedFiles?.Insert(0, download);
+        mainWindowView.DownloadedFiles?.Insert(0, download);
       }
 
-      WindowHelper.MainWindowViewModel.HasFilesDownloaded = mainWindowView.DownloadedFiles.Count > 0;
+      if (mainWindowView != null)
+      {
+        mainWindowView.HasFilesDownloaded = (mainWindowView.DownloadedFiles?.Count ?? 0) > 0;
+      }
     }
     catch (Exception ex)
     {

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using Avalonia;
-using ChemLocalLink.DependencyInjection;
 using DesktopNotifications;
-using Microsoft.Extensions.DependencyInjection;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.FontAwesome;
 
@@ -11,17 +9,10 @@ namespace ChemLocalLink;
 
 internal class Program
 {
-  public static INotificationManager NotificationManager = null!;
-  public static IServiceProvider ServiceProvider = null!;
+  public static INotificationManager? NotificationManager = null!;
 
   private static void Main(string[] args)
   {
-    // setup DI container
-    var services = new ServiceCollection();
-    services.AddApplicationServices();
-    ServiceProvider = services.BuildServiceProvider();
-    ServiceLocator.Initialize(ServiceProvider);
-
     BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
   }
 

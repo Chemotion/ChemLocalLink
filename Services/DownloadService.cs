@@ -19,10 +19,14 @@ public interface IDownloadService
 internal class DownloadService : IDownloadService
 {
   private readonly HttpClient _httpClient;
+  private readonly IApiHelper _apiHelper;
+  private readonly INotificationService _notificationService;
 
-  public DownloadService(HttpClient httpClient)
+  public DownloadService(HttpClient httpClient, IApiHelper apiHelper, INotificationService notificationService)
   {
     _httpClient = httpClient;
+    _apiHelper = apiHelper;
+    _notificationService = notificationService;
   }
 
   public async Task<(string filePath, string originalName)?> DownloadFile(
@@ -35,9 +39,9 @@ internal class DownloadService : IDownloadService
       var token = authToken.Length < 1 ? mainWindowView.Url![(mainWindowView.Url!.LastIndexOf('/') + 1)..] : authToken;
       mainWindowView.AuthToken = token;
       var url = new Uri(mainWindowView.Url!);
-      ApiHelper.apiHost = $"{url.Scheme}://{url.Host}";
-      var downloadUrl = ApiHelper.DownloadUrl(token);
-      mainWindowView.Status = FeedbackHelper.Downloading;
+      _apiHelper.ApiHost = $"{url.Scheme}://{url.Host}";
+      var downloadUrl = _apiHelper.DownloadUrl(token);
+      mainWindowView.Status = NotificationService.Messages.Downloading;
       var progress = new Progress<ProgressInfo>(progressInfo =>
       {
         mainWindowView.Status =
@@ -52,8 +56,8 @@ internal class DownloadService : IDownloadService
 
       if (!response.IsSuccessStatusCode || contentDisposition == null || !contentDisposition.Contains("filename"))
       {
-        mainWindowView.Status = FeedbackHelper.DownloadFail;
-        await FeedbackHelper.ShowNotificationAsync(mainWindowView.Status, mainWindowView);
+        mainWindowView.Status = NotificationService.Messages.DownloadFail;
+        await _notificationService.ShowNotificationAsync(mainWindowView.Status);
 
         return null;
       }
@@ -87,9 +91,10 @@ internal class DownloadService : IDownloadService
     }
     catch (Exception ex)
     {
-      var errorMessage = ex is IOException ? FeedbackHelper.FileAccessError : FeedbackHelper.UnExpectedError;
+      var errorMessage =
+        ex is IOException ? NotificationService.Messages.FileAccessError : NotificationService.Messages.UnExpectedError;
       mainWindowView.Status = errorMessage;
-      await FeedbackHelper.ShowNotificationAsync(mainWindowView.Status, mainWindowView);
+      await _notificationService.ShowNotificationAsync(mainWindowView.Status);
       return null;
     }
   }

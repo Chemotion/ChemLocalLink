@@ -3,13 +3,37 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using ChemLocalLink.Extensions;
+using ChemLocalLink.Services;
 using ChemLocalLink.ViewModels;
 
 namespace ChemLocalLink.Helpers;
 
-internal abstract class ProcessHelper
+public interface IProcessHelper
 {
-  public static async Task HandleProcess(MainWindowViewModel mainWindowView, string _url)
+  Task HandleProcess(MainWindowViewModel mainWindowView, string url);
+}
+
+internal class ProcessHelper : IProcessHelper
+{
+  private readonly IDownloadService _downloadService;
+  private readonly ITokenService _tokenService;
+  private readonly INotificationService _notificationService;
+  private readonly IFileService _fileService;
+
+  public ProcessHelper(
+    IDownloadService downloadService,
+    ITokenService tokenService,
+    INotificationService notificationService,
+    IFileService fileService
+  )
+  {
+    _downloadService = downloadService;
+    _tokenService = tokenService;
+    _notificationService = notificationService;
+    _fileService = fileService;
+  }
+
+  public async Task HandleProcess(MainWindowViewModel mainWindowView, string _url)
   {
     try
     {
@@ -17,8 +41,8 @@ internal abstract class ProcessHelper
       {
         if (!Uri.TryCreate(mainWindowView.Url, UriKind.Absolute, out _))
         {
-          mainWindowView.Status = FeedbackHelper.InvalidUrl;
-          await FeedbackHelper.ShowNotificationAsync(mainWindowView.Status, mainWindowView);
+          mainWindowView.Status = NotificationService.Messages.InvalidUrl;
+          await _notificationService.ShowNotificationAsync(mainWindowView.Status);
 
           return;
         }
@@ -42,33 +66,29 @@ internal abstract class ProcessHelper
         if (!string.IsNullOrEmpty(_url) && mainWindowView.Url != _url)
           mainWindowView.Url = _url;
         var token = _url.ExtractAuthToken();
-        var downloadedFile = await mainWindowView._downloadService.DownloadFile(mainWindowView, token!);
+        var downloadedFile = await _downloadService.DownloadFile(mainWindowView, token!);
         mainWindowView._filePath = downloadedFile?.filePath ?? null;
         if (mainWindowView._filePath == null)
         {
-          mainWindowView.Status = FeedbackHelper.DownloadFail;
-          await FeedbackHelper.ShowNotificationAsync(mainWindowView.Status, mainWindowView);
+          mainWindowView.Status = NotificationService.Messages.DownloadFail;
+          await _notificationService.ShowNotificationAsync(mainWindowView.Status);
           return;
         }
 
-        await mainWindowView._fileService.ProcessFile(
-          mainWindowView._filePath,
-          mainWindowView,
-          downloadedFile?.originalName ?? ""
-        );
-        mainWindowView.Status = FeedbackHelper.DownloadSuccessful;
-        await FeedbackHelper.ShowNotificationAsync(mainWindowView.Status, mainWindowView);
+        await _fileService.ProcessFile(mainWindowView._filePath, mainWindowView, downloadedFile?.originalName ?? "");
+        mainWindowView.Status = NotificationService.Messages.DownloadSuccessful;
+        await _notificationService.ShowNotificationAsync(mainWindowView.Status);
       }
       else
       {
-        mainWindowView.Status = FeedbackHelper.FileAccessError;
-        await FeedbackHelper.ShowNotificationAsync(mainWindowView.Status, mainWindowView);
+        mainWindowView.Status = NotificationService.Messages.FileAccessError;
+        await _notificationService.ShowNotificationAsync(mainWindowView.Status);
       }
     }
     catch (HttpRequestException)
     {
-      mainWindowView.Status = FeedbackHelper.NetworkError;
-      await FeedbackHelper.ShowNotificationAsync(mainWindowView.Status, mainWindowView);
+      mainWindowView.Status = NotificationService.Messages.NetworkError;
+      await _notificationService.ShowNotificationAsync(mainWindowView.Status);
     }
     catch (Exception ex)
     {

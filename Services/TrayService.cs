@@ -12,7 +12,7 @@ namespace ChemLocalLink.Services;
 
 public interface ITrayService
 {
-  void InitializeTray(MainWindowViewModel viewModel);
+  void InitializeTray(MainWindowViewModel viewModel, IWindowHelper windowHelper);
 }
 
 public class TrayService : ITrayService
@@ -20,7 +20,9 @@ public class TrayService : ITrayService
   private TrayIcon? _notifyIcon;
   private MainWindowViewModel? _mainWindowViewModel;
 
-  public void InitializeTray(MainWindowViewModel viewModel)
+  public TrayService() { }
+
+  public void InitializeTray(MainWindowViewModel viewModel, IWindowHelper windowHelper)
   {
     _mainWindowViewModel = viewModel;
 
@@ -28,42 +30,36 @@ public class TrayService : ITrayService
     {
       new NativeMenuItem
       {
-        Header = "Open app",
+        Header = "Reload",
         Command = new RelayCommand(() =>
         {
-          Dispatcher.UIThread.Invoke(() =>
+          Dispatcher.UIThread.Post(() =>
           {
-            if (_mainWindowViewModel?.mainWindow != null)
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-              _mainWindowViewModel.mainWindow.WindowState = WindowState.Normal;
-              _mainWindowViewModel.mainWindow.ShowInTaskbar = true;
+              var process = new System.Diagnostics.Process
+              {
+                StartInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                  FileName = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "",
+                  UseShellExecute = false,
+                },
+              };
+              process.Start();
+              desktop.Shutdown(0);
             }
           });
         }),
       },
+      new NativeMenuItemSeparator(),
       new NativeMenuItem
       {
-        Header = "Upload all edited files & delete locally",
-        Command = new AsyncRelayCommand(async () => await _mainWindowViewModel!.UploadFiles("delete")),
-      },
-      new NativeMenuItem
-      {
-        Header = "Upload all edited files & keep locally",
-        Command = new AsyncRelayCommand(async () => await _mainWindowViewModel!.UploadFiles("")),
-      },
-      new NativeMenuItem
-      {
-        Header = "Open files folder",
-        Command = new RelayCommand(() => _mainWindowViewModel!.OpenDownloadDirectory()),
-      },
-      new NativeMenuItem
-      {
-        Header = "Exit app",
+        Header = "Exit",
         Command = new RelayCommand(() =>
         {
-          if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopApp)
+          if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
           {
-            desktopApp.Shutdown();
+            desktop.Shutdown(0);
           }
         }),
       },
@@ -78,6 +74,6 @@ public class TrayService : ITrayService
     };
 
     // wire up events
-    _notifyIcon.Clicked += (sender, e) => WindowHelper.ShowWindow();
+    _notifyIcon.Clicked += (sender, e) => windowHelper.ShowWindow();
   }
 }

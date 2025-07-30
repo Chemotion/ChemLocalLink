@@ -18,7 +18,6 @@ using ChemLocalLink.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Newtonsoft.Json;
-using INotificationManager = DesktopNotifications.INotificationManager;
 using Timer = System.Timers;
 
 namespace ChemLocalLink.ViewModels;
@@ -27,7 +26,7 @@ public partial class MainWindowViewModel : ObservableObject
 {
   internal readonly HttpClient _httpClient;
   internal string? _filePath;
-  internal INotificationManager? notificationManager;
+  internal readonly INotificationService _notificationService;
   internal readonly DispatcherTimer? idleTimer = new DispatcherTimer();
   internal DateTime lastInteractionTime;
   internal bool isMinimizedByIdleTimer = false;
@@ -38,6 +37,9 @@ public partial class MainWindowViewModel : ObservableObject
   internal readonly IFileService _fileService;
   internal readonly ITokenService _tokenService;
   internal readonly ITrayService _trayService;
+  internal readonly IApiHelper _apiHelper;
+  internal readonly IWindowHelper _windowHelper;
+  internal readonly IProcessHelper _processHelper;
   internal Process? _fileProcess;
 
   [ObservableProperty]
@@ -107,7 +109,11 @@ public partial class MainWindowViewModel : ObservableObject
     IUploadService uploadService,
     IFileService fileService,
     ITokenService tokenService,
-    ITrayService trayService
+    ITrayService trayService,
+    IApiHelper apiHelper,
+    IWindowHelper windowHelper,
+    INotificationService notificationService,
+    IProcessHelper processHelper
   )
   {
     _httpClient = httpClient;
@@ -116,6 +122,10 @@ public partial class MainWindowViewModel : ObservableObject
     _fileService = fileService;
     _tokenService = tokenService;
     _trayService = trayService;
+    _apiHelper = apiHelper;
+    _windowHelper = windowHelper;
+    _notificationService = notificationService;
+    _processHelper = processHelper;
 
     IsDarkMode = Theme.LoadCurrentTheme();
     Process = new RelayCommand<Task>(_ => Task.Run(async () => await ProcessCommand()));
@@ -125,6 +135,11 @@ public partial class MainWindowViewModel : ObservableObject
   {
     this.mainWindow = mainWindow;
     this.args = args ?? throw new ArgumentNullException(nameof(args));
+
+    // Set references in the WindowHelper
+    _windowHelper.MainWindow = mainWindow;
+    _windowHelper.MainWindowViewModel = this;
+
     SetupEventHandlers();
   }
 
@@ -133,13 +148,13 @@ public partial class MainWindowViewModel : ObservableObject
     if (mainWindow != null)
     {
       mainWindow.Loaded += MainWindow_Loaded;
-      mainWindow.Deactivated += (s, e) => WindowHelper.Deactivate(this);
+      mainWindow.Deactivated += (s, e) => _windowHelper.Deactivate(this);
     }
   }
 
   private void MainWindow_Loaded(object? sender, EventArgs e)
   {
-    WindowHelper.Load(this);
+    _windowHelper.Load(this);
     var timer = new Timer.Timer(1);
     timer.Elapsed += OnTimedEvent;
     timer.Enabled = true;
@@ -149,7 +164,7 @@ public partial class MainWindowViewModel : ObservableObject
   {
     try
     {
-      var downloadedFiles = WindowHelper.MainWindowViewModel?.DownloadedFiles;
+      var downloadedFiles = _windowHelper.MainWindowViewModel?.DownloadedFiles;
       if (downloadedFiles == null)
         return;
 
@@ -161,11 +176,11 @@ public partial class MainWindowViewModel : ObservableObject
         if (!fileSumOnDisk.Equals(fileSumOnDownload))
         {
           if (
-            WindowHelper.MainWindowViewModel != null
-            && !WindowHelper.MainWindowViewModel.EditedFileIds.Contains(file.FileId)
+            _windowHelper.MainWindowViewModel != null
+            && !_windowHelper.MainWindowViewModel.EditedFileIds.Contains(file.FileId)
           )
           {
-            WindowHelper.MainWindowViewModel.EditedFileIds.Add(file.FileId);
+            _windowHelper.MainWindowViewModel.EditedFileIds.Add(file.FileId);
           }
 
           var downloadedFile = DownloadedFiles[DownloadedFiles.IndexOf(file)];
@@ -224,10 +239,10 @@ public partial class MainWindowViewModel : ObservableObject
 
   public RelayCommand<Task> Process;
 
-  public async Task ProcessCommand() => await ProcessHelper.HandleProcess(this, Url!);
+  public async Task ProcessCommand() => await _processHelper.HandleProcess(this, Url!);
 
   [RelayCommand]
-  public async Task<bool> UploadFiles(string role) => await _uploadService.UploadEditedFiles(role);
+  public async Task<bool> UploadFiles(string role) => await _uploadService.UploadEditedFiles(this, role);
 
   [RelayCommand]
   public void DeleteSelectedFile()

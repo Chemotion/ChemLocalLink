@@ -7,11 +7,14 @@ using ChemLocalLink.DependencyInjection;
 using ChemLocalLink.Helpers;
 using ChemLocalLink.ViewModels;
 using ChemLocalLink.Views;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ChemLocalLink;
 
 public class App : Application
 {
+  private IServiceProvider? _serviceProvider;
+
   public override void Initialize()
   {
     AvaloniaXamlLoader.Load(this);
@@ -21,16 +24,21 @@ public class App : Application
   {
     if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
     {
+      // Configure DI with the notification manager
+      var services = new ServiceCollection();
+      services.AddApplicationServices(Program.NotificationManager);
+      _serviceProvider = services.BuildServiceProvider();
+
       var mw = new MainWindow();
-      var viewModel = ServiceLocator.GetService<MainWindowViewModel>();
+      var viewModel = _serviceProvider.GetRequiredService<MainWindowViewModel>();
+      var windowHelper = _serviceProvider.GetRequiredService<IWindowHelper>();
+
       viewModel.Initialize(mw, desktop.Args ?? []);
 
-      WindowHelper.MainWindowViewModel = viewModel;
       mw.DataContext = viewModel;
       desktop.Startup += DesktopOnStartup;
       desktop.MainWindow = mw;
       desktop.MainWindow.DataContext = mw.DataContext;
-      WindowHelper.MainWindow = mw;
     }
 
     base.OnFrameworkInitializationCompleted();

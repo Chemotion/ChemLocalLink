@@ -13,22 +13,42 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform;
 using Avalonia.Threading;
-using ChemLocalLink.DependencyInjection;
 using ChemLocalLink.Extensions;
 using ChemLocalLink.Models;
 using ChemLocalLink.Services;
 using ChemLocalLink.ViewModels;
 using ChemLocalLink.Views;
+using DesktopNotifications;
 using Newtonsoft.Json;
 
 namespace ChemLocalLink.Helpers;
 
-public static class WindowHelper
+public interface IWindowHelper
 {
-  public static MainWindowViewModel? MainWindowViewModel { get; set; }
-  public static MainWindow? MainWindow { get; set; }
+  MainWindowViewModel? MainWindowViewModel { get; set; }
+  MainWindow? MainWindow { get; set; }
+  void Deactivate(MainWindowViewModel mainWindowView);
+  void Load(MainWindowViewModel mainWindowView);
+  void ShowWindow();
+}
 
-  public static void Deactivate(MainWindowViewModel mainWindowView)
+public class WindowHelper : IWindowHelper
+{
+  private readonly ITrayService _trayService;
+  private readonly INotificationService _notificationService;
+  private readonly IProcessHelper _processHelper;
+
+  public MainWindowViewModel? MainWindowViewModel { get; set; }
+  public MainWindow? MainWindow { get; set; }
+
+  public WindowHelper(ITrayService trayService, INotificationService notificationService, IProcessHelper processHelper)
+  {
+    _trayService = trayService;
+    _notificationService = notificationService;
+    _processHelper = processHelper;
+  }
+
+  public void Deactivate(MainWindowViewModel mainWindowView)
   {
     var minimized = mainWindowView is { isMinimizedByIdleTimer: false, mainWindow.WindowState: WindowState.Minimized };
     if (mainWindowView.mainWindow != null)
@@ -43,18 +63,9 @@ public static class WindowHelper
       mainWindowView.idleTimer.Start();
   }
 
-  public static void Load(MainWindowViewModel mainWindowView)
+  public void Load(MainWindowViewModel mainWindowView)
   {
-    var trayService = ServiceLocator.GetService<ITrayService>();
-    trayService.InitializeTray(mainWindowView);
-    if (
-      Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major >= 10
-      || Environment.OSVersion.Platform == PlatformID.Unix
-    )
-    {
-      mainWindowView.notificationManager =
-        Program.NotificationManager ?? throw new InvalidOperationException("Missing notification manager");
-    }
+    _trayService.InitializeTray(mainWindowView, this);
 
     Task.Run(async () =>
     {
@@ -70,9 +81,17 @@ public static class WindowHelper
 
         if (File.Exists(filePath) && !string.IsNullOrEmpty(File.ReadAllText(filePath)))
         {
-          Console.WriteLine("File exists and is not empty");
           var data = File.ReadAllText(filePath);
           var downloads = JsonConvert.DeserializeObject<ObservableCollection<Downloads>>(data);
+
+          if (downloads == null || downloads.Count == 0)
+          {
+            mainWindowView.HasFilesDownloaded = false;
+            Console.WriteLine("No downloads found in file");
+            return;
+          }
+
+          Console.WriteLine($"Found {downloads.Count} downloads in JSON");
 
           if (downloads.Count > 0)
           {
@@ -88,7 +107,7 @@ public static class WindowHelper
 
             var newData = JsonConvert.SerializeObject(mainWindowView.DownloadedFiles.Reverse());
             File.WriteAllText(filePath, newData);
-            mainWindowView.HasFilesDownloaded = true;
+            mainWindowView.HasFilesDownloaded = mainWindowView.DownloadedFiles.Count > 0;
           }
           else
           {
@@ -106,21 +125,21 @@ public static class WindowHelper
           var parsedUrl = mainWindowView.args.First().ParseUrl();
           if (parsedUrl == null || parsedUrl == "invalid uri")
           {
-            mainWindowView.Status = FeedbackHelper.InvalidUrl;
-            await FeedbackHelper.ShowNotificationAsync(mainWindowView.Status, mainWindowView);
+            mainWindowView.Status = NotificationService.Messages.InvalidUrl;
+            await _notificationService.ShowNotificationAsync(mainWindowView.Status);
             return;
           }
 
           var authToken = parsedUrl.ExtractAuthToken();
           if (authToken == null)
           {
-            mainWindowView.Status = FeedbackHelper.TokenFail;
-            await FeedbackHelper.ShowNotificationAsync(mainWindowView.Status, mainWindowView);
+            mainWindowView.Status = NotificationService.Messages.TokenFail;
+            await _notificationService.ShowNotificationAsync(mainWindowView.Status);
             return;
           }
 
           mainWindowView.Url = parsedUrl;
-          await ProcessHelper.HandleProcess(mainWindowView, parsedUrl);
+          await _processHelper.HandleProcess(mainWindowView, parsedUrl);
         }
       }
       catch (Exception ex)
@@ -131,7 +150,7 @@ public static class WindowHelper
     MinimizeWindowOnIdle();
   }
 
-  private static void MinimizeWindowOnIdle()
+  private void MinimizeWindowOnIdle()
   {
     try
     {
@@ -148,7 +167,7 @@ public static class WindowHelper
         window.WindowState = WindowState.Minimized;
         idleTimer.IsEnabled = false;
         idleTimer.Stop();
-        await FeedbackHelper.ShowNotificationAsync(FeedbackHelper.Minimize, MainWindowViewModel);
+        await _notificationService.ShowNotificationAsync(NotificationService.Messages.Minimize);
         idleTimer.Start();
         window.PointerPressed += (sender, eventArgs) => ResetLastInteractionTime(MainWindowViewModel);
         window.PointerMoved += (sender, eventArgs) => ResetLastInteractionTime(MainWindowViewModel);
@@ -163,7 +182,7 @@ public static class WindowHelper
     }
   }
 
-  private static void ResetLastInteractionTime(MainWindowViewModel mainWindowView)
+  private void ResetLastInteractionTime(MainWindowViewModel mainWindowView)
   {
     mainWindowView.lastInteractionTime = DateTime.Now;
 
@@ -190,7 +209,7 @@ public static class WindowHelper
     }
   }
 
-  public static void ShowWindow()
+  public void ShowWindow()
   {
     if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktopApp)
       return;

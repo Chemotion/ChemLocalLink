@@ -11,15 +11,18 @@ public interface ITokenService
 {
   Task FetchAuthToken(MainWindowViewModel mainWindowView);
   JwtPayload GetTokenParameters(string token);
+  long TokenExp(string token);
 }
 
 internal class TokenService : ITokenService
 {
   private readonly HttpClient _httpClient;
+  private readonly IApiHelper _apiHelper;
 
-  public TokenService(HttpClient httpClient)
+  public TokenService(HttpClient httpClient, IApiHelper apiHelper)
   {
     _httpClient = httpClient;
+    _apiHelper = apiHelper;
   }
 
   public async Task FetchAuthToken(MainWindowViewModel mainWindowView)
@@ -30,7 +33,7 @@ internal class TokenService : ITokenService
       if (true)
       {
         var response = await _httpClient.GetAsync(
-          ApiHelper.TokenUrl(tokenParameters["attID"].ToString(), tokenParameters["appID"].ToString())
+          _apiHelper.TokenUrl(tokenParameters["attID"].ToString(), tokenParameters["appID"].ToString())
         );
 
         if (response.IsSuccessStatusCode)
@@ -70,5 +73,10 @@ internal class TokenService : ITokenService
     return handler.ReadToken(url[(url.LastIndexOf('/') + 1)..]) is not JwtSecurityToken jsonToken
       ? []
       : jsonToken.Payload;
+  }
+
+  public long TokenExp(string token)
+  {
+    return GetTokenParameters(token).Expiration ?? 0;
   }
 }

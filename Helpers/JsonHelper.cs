@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using ChemLocalLink.ViewModels;
 using Newtonsoft.Json;
 
 namespace ChemLocalLink.Helpers;
@@ -31,7 +32,7 @@ public static class JsonHelper
     File.WriteAllText(path, json);
   }
 
-  public static async void WriteDataToAppData()
+  public static async void WriteDataToAppData(MainWindowViewModel mainWindowViewModel)
   {
     var appDataPath = Path.Combine(
       Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -39,7 +40,7 @@ public static class JsonHelper
     );
     Directory.CreateDirectory(appDataPath);
     var jsonFilePath = Path.Combine(appDataPath, "downloads.json");
-    var data = JsonConvert.SerializeObject(WindowHelper.MainWindowViewModel!.DownloadedFiles);
+    var data = JsonConvert.SerializeObject(mainWindowViewModel.DownloadedFiles);
     await File.WriteAllTextAsync(jsonFilePath, data);
   }
 }

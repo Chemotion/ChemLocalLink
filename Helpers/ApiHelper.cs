@@ -1,25 +1,33 @@
-﻿using ChemLocalLink.DependencyInjection;
-using ChemLocalLink.Services;
+﻿using ChemLocalLink.Services;
 
 namespace ChemLocalLink.Helpers;
 
-internal abstract class ApiHelper
+public interface IApiHelper
 {
-  internal static string? apiHost = "";
-  private static string? DownloadEndPoint = "api/v1/public/third_party_apps";
-  private static string? UploadEndPoint = "api/v1/public/third_party_apps";
-  private static string? TokenEndPoint = "api/v1/third_party_apps/token";
+  string ApiHost { get; set; }
+  string DownloadUrl(string token);
+  string UploadUrl(string authToken);
+  string TokenUrl(string? attId, string? appId);
+}
 
-  public static string DownloadUrl(string token) => $"{apiHost}/{DownloadEndPoint}/{token}";
+internal class ApiHelper : IApiHelper
+{
+  private string? _apiHost = "";
+  private readonly string _downloadEndPoint = "api/v1/public/third_party_apps";
+  private readonly string _uploadEndPoint = "api/v1/public/third_party_apps";
+  private readonly string _tokenEndPoint = "api/v1/third_party_apps/token";
 
-  public static string UploadUrl(string authToken) => $"{apiHost}/{UploadEndPoint}/{authToken}";
-
-  public static string TokenUrl(string? attId, string? appId) =>
-    $"{apiHost}/{TokenEndPoint}?attID={attId}&appId={appId}";
-
-  public static long TokenExp(string token)
+  public string ApiHost
   {
-    var tokenService = ServiceLocator.GetService<ITokenService>();
-    return tokenService.GetTokenParameters(token).Expiration ?? 0;
+    get => _apiHost ?? "";
+    set => _apiHost = value;
   }
+
+  public ApiHelper() { }
+
+  public string DownloadUrl(string token) => $"{ApiHost}/{_downloadEndPoint}/{token}";
+
+  public string UploadUrl(string authToken) => $"{ApiHost}/{_uploadEndPoint}/{authToken}";
+
+  public string TokenUrl(string? attId, string? appId) => $"{ApiHost}/{_tokenEndPoint}?attID={attId}&appId={appId}";
 }

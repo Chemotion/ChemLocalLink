@@ -14,30 +14,40 @@ namespace ChemLocalLink.Services;
 
 public interface IUploadService
 {
-  Task<bool> UploadEditedFiles(string role = "");
+  Task<bool> UploadEditedFiles(MainWindowViewModel mainWindowView, string role = "");
 }
 
 internal class UploadService : IUploadService
 {
-  public async Task<bool> UploadEditedFiles(string role = "")
+  private readonly HttpClient _httpClient;
+  private readonly IApiHelper _apiHelper;
+  private readonly INotificationService _notificationService;
+
+  public UploadService(HttpClient httpClient, IApiHelper apiHelper, INotificationService notificationService)
+  {
+    _httpClient = httpClient;
+    _apiHelper = apiHelper;
+    _notificationService = notificationService;
+  }
+
+  public async Task<bool> UploadEditedFiles(MainWindowViewModel mainWindowView, string role = "")
   {
     try
     {
-      var mainWindowViewModel = WindowHelper.MainWindowViewModel;
-      if (mainWindowViewModel?.DownloadedFiles.Count == 0)
+      if (mainWindowView?.DownloadedFiles.Count == 0)
       {
-        mainWindowViewModel!.Status = FeedbackHelper.NoDownloads;
-        await FeedbackHelper.ShowNotificationAsync(mainWindowViewModel.Status, mainWindowViewModel);
+        mainWindowView!.Status = NotificationService.Messages.NoDownloads;
+        await _notificationService.ShowNotificationAsync(mainWindowView.Status);
         return false;
       }
 
-      if (mainWindowViewModel?.SelectedDownloadedFileIndex > -1)
+      if (mainWindowView?.SelectedDownloadedFileIndex > -1)
       {
-        return await HandleSingleFileUpload(role, mainWindowViewModel);
+        return await HandleSingleFileUpload(role, mainWindowView);
       }
       else
       {
-        return await HandleMultipleFilesUpload(role, mainWindowViewModel!);
+        return await HandleMultipleFilesUpload(role, mainWindowView!);
       }
     }
     catch (Exception)
@@ -46,10 +56,9 @@ internal class UploadService : IUploadService
     }
     finally
     {
-      var mainWindowViewModel = WindowHelper.MainWindowViewModel;
-      if (mainWindowViewModel?.DownloadedFiles != null)
+      if (mainWindowView?.DownloadedFiles != null)
       {
-        mainWindowViewModel.HasFilesDownloaded = mainWindowViewModel.DownloadedFiles.Count > 0;
+        mainWindowView.HasFilesDownloaded = mainWindowView.DownloadedFiles.Count > 0;
       }
     }
   }
@@ -60,8 +69,8 @@ internal class UploadService : IUploadService
 
     if (file.IsKept)
     {
-      mainWindowViewModel.Status = FeedbackHelper.FileKept;
-      await FeedbackHelper.ShowNotificationAsync(mainWindowViewModel.Status, mainWindowViewModel);
+      mainWindowViewModel.Status = NotificationService.Messages.FileKept;
+      await _notificationService.ShowNotificationAsync(mainWindowViewModel.Status);
       return false;
     }
 
@@ -70,8 +79,8 @@ internal class UploadService : IUploadService
 
     if (fileSumOnDisk.Equals(fileSumOnDownload))
     {
-      mainWindowViewModel.Status = FeedbackHelper.FileNotEdited;
-      await FeedbackHelper.ShowNotificationAsync(mainWindowViewModel.Status, mainWindowViewModel);
+      mainWindowViewModel.Status = NotificationService.Messages.FileNotEdited;
+      await _notificationService.ShowNotificationAsync(mainWindowViewModel.Status);
       return false;
     }
 
@@ -87,8 +96,8 @@ internal class UploadService : IUploadService
     {
       if (file.IsKept)
       {
-        mainWindowViewModel.Status = FeedbackHelper.FileKept;
-        await FeedbackHelper.ShowNotificationAsync(mainWindowViewModel.Status, mainWindowViewModel);
+        mainWindowViewModel.Status = NotificationService.Messages.FileKept;
+        await _notificationService.ShowNotificationAsync(mainWindowViewModel.Status);
         continue;
       }
 
@@ -107,8 +116,8 @@ internal class UploadService : IUploadService
 
     if (filesToRemove.Count == 0)
     {
-      mainWindowViewModel.Status = FeedbackHelper.FileNotEdited;
-      await FeedbackHelper.ShowNotificationAsync(mainWindowViewModel.Status, mainWindowViewModel);
+      mainWindowViewModel.Status = NotificationService.Messages.FileNotEdited;
+      await _notificationService.ShowNotificationAsync(mainWindowViewModel.Status);
       return false;
     }
 
@@ -119,7 +128,7 @@ internal class UploadService : IUploadService
   {
     File.Delete(file.FilePath);
     mainWindowViewModel.DownloadedFiles.RemoveAt(mainWindowViewModel.SelectedDownloadedFileIndex);
-    JsonHelper.WriteDataToAppData();
+    JsonHelper.WriteDataToAppData(mainWindowViewModel);
     return true;
   }
 
@@ -127,7 +136,7 @@ internal class UploadService : IUploadService
   {
     file.IsEdited = false;
     file.IsKept = true;
-    JsonHelper.WriteDataToAppData();
+    JsonHelper.WriteDataToAppData(mainWindowViewModel);
     return true;
   }
 
@@ -160,7 +169,7 @@ internal class UploadService : IUploadService
         }
       }
 
-      JsonHelper.WriteDataToAppData();
+      JsonHelper.WriteDataToAppData(mainWindowViewModel);
       return true;
     }
     catch (Exception)
@@ -196,8 +205,8 @@ internal class UploadService : IUploadService
     {
       if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
       {
-        mainView.Status = FeedbackHelper.FileAccessError;
-        await FeedbackHelper.ShowNotificationAsync(WindowHelper.MainWindowViewModel?.Status!, mainView);
+        mainView.Status = NotificationService.Messages.FileAccessError;
+        await _notificationService.ShowNotificationAsync(mainView.Status);
         return false;
       }
 
@@ -219,12 +228,12 @@ internal class UploadService : IUploadService
         mainView.FileUpDownProgress = prog.Percentage;
         if (prog.BytesRead >= new FileInfo(filePath).Length)
         {
-          mainView.Status = FeedbackHelper.UploadSuccessful;
+          mainView.Status = NotificationService.Messages.UploadSuccessful;
         }
       });
 
-      var response = await mainView._httpClient.PostWithProgressAsync(
-        ApiHelper.UploadUrl(mainView.AuthToken),
+      var response = await _httpClient.PostWithProgressAsync(
+        _apiHelper.UploadUrl(mainView.AuthToken),
         content,
         progress,
         isUpload: true
@@ -232,21 +241,21 @@ internal class UploadService : IUploadService
 
       if (response.IsSuccessStatusCode)
       {
-        mainView.Status = FeedbackHelper.UploadSuccessful;
-        await FeedbackHelper.ShowNotificationAsync(WindowHelper.MainWindowViewModel?.Status!, mainView);
+        mainView.Status = NotificationService.Messages.UploadSuccessful;
+        await _notificationService.ShowNotificationAsync(mainView.Status);
         return true;
       }
       else
       {
-        mainView.Status = FeedbackHelper.UploadFail;
-        await FeedbackHelper.ShowNotificationAsync(WindowHelper.MainWindowViewModel?.Status!, mainView);
+        mainView.Status = NotificationService.Messages.UploadFail;
+        await _notificationService.ShowNotificationAsync(mainView.Status);
         return false;
       }
     }
     catch (Exception)
     {
-      mainView.Status = FeedbackHelper.UploadFail;
-      await FeedbackHelper.ShowNotificationAsync(WindowHelper.MainWindowViewModel?.Status!, mainView);
+      mainView.Status = NotificationService.Messages.UploadFail;
+      await _notificationService.ShowNotificationAsync(mainView.Status);
       return false;
     }
   }

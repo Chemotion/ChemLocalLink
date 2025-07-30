@@ -13,15 +13,15 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using ChemLocalLink.DependencyInjection;
+using ChemLocalLink.Extensions;
+using ChemLocalLink.Models;
+using ChemLocalLink.Services;
+using ChemLocalLink.ViewModels;
+using ChemLocalLink.Views;
 using Newtonsoft.Json;
-using urlhandler.DependencyInjection;
-using urlhandler.Extensions;
-using urlhandler.Models;
-using urlhandler.Services;
-using urlhandler.ViewModels;
-using urlhandler.Views;
 
-namespace urlhandler.Helpers;
+namespace ChemLocalLink.Helpers;
 
 public static class WindowHelper
 {

@@ -1,6 +1,6 @@
 using System;
 
-namespace urlhandler.DependencyInjection;
+namespace ChemLocalLink.DependencyInjection;
 
 public interface IServiceLocator
 {

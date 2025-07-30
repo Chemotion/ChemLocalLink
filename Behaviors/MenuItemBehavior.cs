@@ -1,10 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Xaml.Interactivity;
+using ChemLocalLink.ViewModels;
 using CommunityToolkit.Mvvm.Input;
-using urlhandler.ViewModels;
 
-namespace urlhandler.Behaviors;
+namespace ChemLocalLink.Behaviors;
 
 public class MenuItemBehavior : Behavior<MenuItem>
 {

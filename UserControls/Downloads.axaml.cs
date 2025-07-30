@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace urlhandler.UserControls;
+namespace ChemLocalLink.UserControls;
 
 public partial class Downloads : UserControl
 {

@@ -4,7 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 
-namespace urlhandler.Behaviors;
+namespace ChemLocalLink.Behaviors;
 
 //source: https://github.com/AvaloniaUI/Avalonia/issues/3847#issuecomment-1618790059
 public static class ShowDisabledTooltipExtension

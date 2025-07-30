@@ -1,8 +1,8 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="urlhandler.App"
-             xmlns:local="using:urlhandler"
-             xmlns:behaviors="clr-namespace:urlhandler.Behaviors"
+             x:Class="ChemLocalLink.App"
+             xmlns:local="using:ChemLocalLink"
+             xmlns:behaviors="clr-namespace:ChemLocalLink.Behaviors"
              RequestedThemeVariant="Dark">
   <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 

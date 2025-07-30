@@ -3,7 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Web;
 
-namespace urlhandler.Extensions;
+namespace ChemLocalLink.Extensions;
 
 public static class StringExtension
 {

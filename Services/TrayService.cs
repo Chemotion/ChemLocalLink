@@ -4,11 +4,11 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using ChemLocalLink.Helpers;
+using ChemLocalLink.ViewModels;
 using CommunityToolkit.Mvvm.Input;
-using urlhandler.Helpers;
-using urlhandler.ViewModels;
 
-namespace urlhandler.Services;
+namespace ChemLocalLink.Services;
 
 public interface ITrayService
 {
@@ -71,7 +71,7 @@ public class TrayService : ITrayService
 
     _notifyIcon = new TrayIcon
     {
-      Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://urlhandler/Assets/icon.ico"))),
+      Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://ChemLocalLink/Assets/icon.ico"))),
       IsVisible = true,
       ToolTipText = "ChemLocalLink",
       Menu = _trayMenu,

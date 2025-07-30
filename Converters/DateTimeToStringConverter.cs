@@ -3,7 +3,7 @@ using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 
-namespace urlhandler.Converters;
+namespace ChemLocalLink.Converters;
 
 public class DateTimeToStringConverter : IValueConverter
 {

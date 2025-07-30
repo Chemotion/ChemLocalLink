@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using Avalonia;
+using ChemLocalLink.DependencyInjection;
 using DesktopNotifications;
 using Microsoft.Extensions.DependencyInjection;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.FontAwesome;
-using urlhandler.DependencyInjection;
 
-namespace urlhandler;
+namespace ChemLocalLink;
 
 internal class Program
 {

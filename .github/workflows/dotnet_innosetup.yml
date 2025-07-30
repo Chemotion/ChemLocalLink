@@ -27,8 +27,8 @@ jobs:
 
     - name: Update version in iss file
       run: |
-        sed -i 's/#define AppVersion ".*"/#define AppVersion "${{ github.event.inputs.version }}"/' .winbuild/urlhandler.iss
-        
+        sed -i 's/#define AppVersion ".*"/#define AppVersion "${{ github.event.inputs.version }}"/' .winbuild/ChemLocalLink.iss
+
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
@@ -38,12 +38,12 @@ jobs:
     - name: Publish project
       run: |
         dotnet publish -p:PublishSingleFile=true --self-contained false
-        ren "bin\Release\net8.0-windows10.0.17763.0\win-x64\publish\urlhandler.exe" "ChemLocalLink.exe"
+        ren "bin\Release\net8.0-windows10.0.17763.0\win-x64\publish\ChemLocalLink.exe" "ChemLocalLink.exe"
 
     - name: Build Installer
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
       with:
-        path: .winbuild/urlhandler.iss
+        path: .winbuild/ChemLocalLink.iss
 
     - name: Create GitHub Release
       id: create_release

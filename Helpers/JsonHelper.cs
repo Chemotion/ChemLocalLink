@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace urlhandler.Helpers;
+namespace ChemLocalLink.Helpers;
 
 public static class JsonHelper
 {

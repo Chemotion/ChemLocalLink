@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using ChemLocalLink.ViewModels;
 using DesktopNotifications;
-using urlhandler.ViewModels;
 
-namespace urlhandler.Helpers;
+namespace ChemLocalLink.Helpers;
 
 public static class FeedbackHelper
 {

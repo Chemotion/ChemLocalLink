@@ -3,12 +3,12 @@ using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using urlhandler.DependencyInjection;
-using urlhandler.Helpers;
-using urlhandler.ViewModels;
-using urlhandler.Views;
+using ChemLocalLink.DependencyInjection;
+using ChemLocalLink.Helpers;
+using ChemLocalLink.ViewModels;
+using ChemLocalLink.Views;
 
-namespace urlhandler;
+namespace ChemLocalLink;
 
 public class App : Application
 {

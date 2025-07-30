@@ -1,7 +1,7 @@
-﻿using urlhandler.DependencyInjection;
-using urlhandler.Services;
+﻿using ChemLocalLink.DependencyInjection;
+using ChemLocalLink.Services;
 
-namespace urlhandler.Helpers;
+namespace ChemLocalLink.Helpers;
 
 internal abstract class ApiHelper
 {

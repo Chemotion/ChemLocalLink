@@ -1,4 +1,4 @@
-namespace urlhandler.Models;
+namespace ChemLocalLink.Models;
 
 public class ProgressInfo(long bytesRead, long? totalBytesExpected, double percentage)
 {

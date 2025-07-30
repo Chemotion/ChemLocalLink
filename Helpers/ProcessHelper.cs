@@ -2,10 +2,10 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
-using urlhandler.Extensions;
-using urlhandler.ViewModels;
+using ChemLocalLink.Extensions;
+using ChemLocalLink.ViewModels;
 
-namespace urlhandler.Helpers;
+namespace ChemLocalLink.Helpers;
 
 internal abstract class ProcessHelper
 {

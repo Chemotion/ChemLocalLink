@@ -1,11 +1,11 @@
 using System;
 using System.Net.Http;
+using ChemLocalLink.Services;
+using ChemLocalLink.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using urlhandler.Services;
-using urlhandler.ViewModels;
 
-namespace urlhandler.DependencyInjection;
+namespace ChemLocalLink.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {

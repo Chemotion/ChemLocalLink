@@ -3,12 +3,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using urlhandler.Extensions;
-using urlhandler.Helpers;
-using urlhandler.Models;
-using urlhandler.ViewModels;
+using ChemLocalLink.Extensions;
+using ChemLocalLink.Helpers;
+using ChemLocalLink.Models;
+using ChemLocalLink.ViewModels;
 
-namespace urlhandler.Services;
+namespace ChemLocalLink.Services;
 
 public interface IFileService
 {

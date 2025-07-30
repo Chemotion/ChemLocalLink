@@ -2,10 +2,10 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Threading.Tasks;
-using urlhandler.Helpers;
-using urlhandler.ViewModels;
+using ChemLocalLink.Helpers;
+using ChemLocalLink.ViewModels;
 
-namespace urlhandler.Services;
+namespace ChemLocalLink.Services;
 
 public interface ITokenService
 {

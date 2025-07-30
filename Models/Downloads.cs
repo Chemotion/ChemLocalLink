@@ -1,7 +1,7 @@
 using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace urlhandler.Models;
+namespace ChemLocalLink.Models;
 
 public partial class Downloads : ObservableObject
 {

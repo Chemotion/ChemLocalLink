@@ -4,13 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using ChemLocalLink.Extensions;
+using ChemLocalLink.Helpers;
+using ChemLocalLink.Models;
+using ChemLocalLink.ViewModels;
 using MsBox.Avalonia;
-using urlhandler.Extensions;
-using urlhandler.Helpers;
-using urlhandler.Models;
-using urlhandler.ViewModels;
 
-namespace urlhandler.Services;
+namespace ChemLocalLink.Services;
 
 public interface IUploadService
 {

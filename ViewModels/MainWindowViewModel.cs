@@ -10,18 +10,18 @@ using Avalonia;
 using Avalonia.Input;
 using Avalonia.Styling;
 using Avalonia.Threading;
+using ChemLocalLink.Extensions;
+using ChemLocalLink.Helpers;
+using ChemLocalLink.Models;
+using ChemLocalLink.Services;
+using ChemLocalLink.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Newtonsoft.Json;
-using urlhandler.Extensions;
-using urlhandler.Helpers;
-using urlhandler.Models;
-using urlhandler.Services;
-using urlhandler.Views;
 using INotificationManager = DesktopNotifications.INotificationManager;
 using Timer = System.Timers;
 
-namespace urlhandler.ViewModels;
+namespace ChemLocalLink.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject
 {

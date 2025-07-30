@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace urlhandler.DependencyInjection;
+namespace ChemLocalLink.DependencyInjection;
 
 public static class ServiceLocator
 {

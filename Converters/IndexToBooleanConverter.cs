@@ -1,7 +1,7 @@
 using System;
 using Avalonia.Data.Converters;
 
-namespace urlhandler.Converters;
+namespace ChemLocalLink.Converters;
 
 public class IndexToBooleanConverter : IValueConverter
 {

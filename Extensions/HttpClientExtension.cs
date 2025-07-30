@@ -3,9 +3,9 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using urlhandler.Models;
+using ChemLocalLink.Models;
 
-namespace urlhandler.Extensions;
+namespace ChemLocalLink.Extensions;
 
 public static class HttpClientExtension
 {

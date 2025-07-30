@@ -5,7 +5,7 @@ using DesktopNotifications;
 using DesktopNotifications.FreeDesktop;
 using DesktopNotifications.Windows;
 
-namespace urlhandler;
+namespace ChemLocalLink;
 
 public static class AppBuilderExtensions
 {

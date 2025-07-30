@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace urlhandler.Views;
+namespace ChemLocalLink.Views;
 
 public partial class MainWindow : Window
 {

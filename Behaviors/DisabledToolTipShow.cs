@@ -1,3 +1,12 @@
+/// <summary>
+/// Enables tooltips on disabled Avalonia controls
+///
+/// Improves UX by showing reasons for disabled actions
+/// Tracks pointer over disabled controls to display tooltips
+/// Manages tooltip visibility and cleanup in visual tree
+/// Use ShowOnDisabled property to activate on controls
+/// </summary>
+
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;

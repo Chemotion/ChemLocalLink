@@ -1,4 +1,14 @@
-﻿using System;
+﻿/// <summary>
+/// Manages local files, tracking, and download history persistence
+///
+/// Opens downloaded files with default apps and assigns unique IDs
+/// Calculates file checksums for edit detection
+/// Saves metadata to %AppData%/ChemLocalLink/downloads.json
+/// Tracks file size, timestamps, and token expiration
+/// Ensures persistent and editable file monitoring across sessions
+/// </summary>
+
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;

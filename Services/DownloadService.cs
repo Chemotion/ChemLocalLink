@@ -1,4 +1,14 @@
-﻿using System;
+﻿/// <summary>
+/// Downloads files from Chemotion servers with progress and error handling
+///
+/// Authenticates using bearer tokens and tracks download progress
+/// Resolves filename conflicts by auto-renaming duplicates
+/// Saves files in %temp%/chemotion/ directory
+/// Extracts original names from response headers
+/// Reports issues like network or file errors to the user
+/// </summary>
+
+using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;

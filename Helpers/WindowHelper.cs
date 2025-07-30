@@ -1,4 +1,14 @@
-﻿using System;
+﻿/// <summary>
+/// Manages window state, startup, and user interaction tracking
+///
+/// Handles chemotion:// URL arguments at startup
+/// Restores downloads and theme from previous sessions
+/// Manages window visibility, tray integration, and idle minimization
+/// Tracks user activity to auto-minimize after inactivity
+/// Bridges UI with services for a seamless user experience
+/// </summary>
+
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -77,7 +87,6 @@ public class WindowHelper : IWindowHelper
         );
         Directory.CreateDirectory(appDataPath);
         var filePath = Path.Combine(appDataPath, "downloads.json");
-        Console.WriteLine($"Checking for file at path: {filePath}");
 
         if (File.Exists(filePath) && !string.IsNullOrEmpty(File.ReadAllText(filePath)))
         {
@@ -87,37 +96,34 @@ public class WindowHelper : IWindowHelper
           if (downloads == null || downloads.Count == 0)
           {
             mainWindowView.HasFilesDownloaded = false;
-            Console.WriteLine("No downloads found in file");
-            return;
-          }
-
-          Console.WriteLine($"Found {downloads.Count} downloads in JSON");
-
-          if (downloads.Count > 0)
-          {
-            foreach (var download in downloads)
-            {
-              if (File.Exists(download.FilePath))
-              {
-                if (download.IsKept && download.IsEdited)
-                  download.IsEdited = false;
-                mainWindowView.DownloadedFiles.Insert(0, download);
-              }
-            }
-
-            var newData = JsonConvert.SerializeObject(mainWindowView.DownloadedFiles.Reverse());
-            File.WriteAllText(filePath, newData);
-            mainWindowView.HasFilesDownloaded = mainWindowView.DownloadedFiles.Count > 0;
           }
           else
           {
-            mainWindowView.HasFilesDownloaded = false;
+            if (downloads.Count > 0)
+            {
+              foreach (var download in downloads)
+              {
+                if (File.Exists(download.FilePath))
+                {
+                  if (download.IsKept && download.IsEdited)
+                    download.IsEdited = false;
+                  mainWindowView.DownloadedFiles.Insert(0, download);
+                }
+              }
+
+              var newData = JsonConvert.SerializeObject(mainWindowView.DownloadedFiles.Reverse());
+              File.WriteAllText(filePath, newData);
+              mainWindowView.HasFilesDownloaded = mainWindowView.DownloadedFiles.Count > 0;
+            }
+            else
+            {
+              mainWindowView.HasFilesDownloaded = false;
+            }
           }
         }
         else
         {
           mainWindowView.HasFilesDownloaded = false;
-          Console.WriteLine("File does not exist or is empty");
         }
 
         if (mainWindowView.args?.Length > 0)
@@ -145,6 +151,7 @@ public class WindowHelper : IWindowHelper
       catch (Exception ex)
       {
         Console.WriteLine($"Exception in Load method: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
       }
     });
     MinimizeWindowOnIdle();

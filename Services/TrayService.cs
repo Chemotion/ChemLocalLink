@@ -1,4 +1,14 @@
-﻿using System;
+﻿/// <summary>
+/// Manages system tray icon, context menu, and user interactions
+///
+/// Adds tray icon with ChemLocalLink branding and tooltip
+/// Provides Reload and Exit options in context menu
+/// Handles click to restore main window from tray
+/// Supports app restart via tray menu
+/// Used by WindowHelper during startup
+/// </summary>
+
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;

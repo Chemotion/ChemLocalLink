@@ -1,4 +1,14 @@
-﻿using System;
+﻿/// <summary>
+/// Main view model managing app state, file operations, and UI logic
+///
+/// Handles chemotion:// URL processing, downloads, and uploads
+/// Monitors files for external edits using periodic checksums
+/// Manages theme, idle timer, and window state
+/// Binds data and commands to MainWindow UI
+/// Implements IDisposable for resource cleanup
+/// </summary>
+
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -22,12 +32,13 @@ using Timer = System.Timers;
 
 namespace ChemLocalLink.ViewModels;
 
-public partial class MainWindowViewModel : ObservableObject
+public partial class MainWindowViewModel : ObservableObject, IDisposable
 {
   internal readonly HttpClient _httpClient;
   internal string? _filePath;
   internal readonly INotificationService _notificationService;
   internal readonly DispatcherTimer? idleTimer = new DispatcherTimer();
+  internal Timer.Timer? fileMonitorTimer;
   internal DateTime lastInteractionTime;
   internal bool isMinimizedByIdleTimer = false;
   internal MainWindow? mainWindow;
@@ -76,9 +87,6 @@ public partial class MainWindowViewModel : ObservableObject
 
   [ObservableProperty]
   private bool _isAlreadyProcessing;
-
-  [ObservableProperty]
-  private bool _isManualEnabled;
 
   [ObservableProperty]
   string _authToken = "";
@@ -155,9 +163,9 @@ public partial class MainWindowViewModel : ObservableObject
   private void MainWindow_Loaded(object? sender, EventArgs e)
   {
     _windowHelper.Load(this);
-    var timer = new Timer.Timer(1);
-    timer.Elapsed += OnTimedEvent;
-    timer.Enabled = true;
+    fileMonitorTimer = new Timer.Timer(5000); // Check for file changes every 5 seconds instead of 1ms
+    fileMonitorTimer.Elapsed += OnTimedEvent;
+    fileMonitorTimer.Enabled = true;
   }
 
   private void OnTimedEvent(object? source, Timer.ElapsedEventArgs e)
@@ -170,6 +178,13 @@ public partial class MainWindowViewModel : ObservableObject
 
       foreach (var file in downloadedFiles)
       {
+        // Check if file still exists before calculating checksum
+        if (!File.Exists(file.FilePath))
+        {
+          file.IsEdited = false;
+          continue;
+        }
+
         var fileSumOnDisk = file.FilePath.FileCheckSum();
         var fileSumOnDownload = file.FileSumOnDownload;
 
@@ -275,5 +290,13 @@ public partial class MainWindowViewModel : ObservableObject
       await Task.Delay(10000);
       Status = "";
     });
+  }
+
+  public void Dispose()
+  {
+    fileMonitorTimer?.Stop();
+    fileMonitorTimer?.Dispose();
+    idleTimer?.Stop();
+    _fileProcess?.Dispose();
   }
 }

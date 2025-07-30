@@ -1,4 +1,13 @@
-﻿using ChemLocalLink.Services;
+﻿/// <summary>
+/// Builds Chemotion API URLs for download, upload, and token operations
+///
+/// Dynamically sets API host from chemotion:// links
+/// Constructs versioned endpoints with token and ID parameters
+/// Ensures consistent API paths for third-party app integration
+/// Used by services to communicate with Chemotion ELN
+/// </summary>
+
+using ChemLocalLink.Services;
 
 namespace ChemLocalLink.Helpers;
 

@@ -1,4 +1,14 @@
-﻿using System;
+﻿/// <summary>
+/// Coordinates chemotion:// URL processing and file download workflow
+///
+/// Validates and parses URLs, extracts tokens, and handles downloads
+/// Integrates with DownloadService and FileService
+/// Manages errors and user notifications at each step
+/// Prevents concurrent processing of multiple URLs
+/// Ties together all services for end-to-end file handling
+/// </summary>
+
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
@@ -93,6 +103,7 @@ internal class ProcessHelper : IProcessHelper
     catch (Exception ex)
     {
       Console.WriteLine($"Error in Process method: {ex.Message}");
+      Console.WriteLine($"Stack trace: {ex.StackTrace}");
       throw;
     }
   }

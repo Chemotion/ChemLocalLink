@@ -1,3 +1,13 @@
+/// <summary>
+/// Uploads edited files to Chemotion servers with progress and file validation
+///
+/// Supports "delete" and "keep" upload modes
+/// Validates edits via checksum before uploading
+/// Handles single and batch uploads with progress reporting
+/// Updates local file state and downloads.json after upload
+/// Notifies users of success or failure
+/// </summary>
+
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -50,8 +60,9 @@ internal class UploadService : IUploadService
         return await HandleMultipleFilesUpload(role, mainWindowView!);
       }
     }
-    catch (Exception)
+    catch (Exception ex)
     {
+      Console.WriteLine($"Error uploading files: {ex.Message}");
       return false;
     }
     finally
@@ -172,8 +183,9 @@ internal class UploadService : IUploadService
       JsonHelper.WriteDataToAppData(mainWindowViewModel);
       return true;
     }
-    catch (Exception)
+    catch (Exception ex)
     {
+      Console.WriteLine($"Error handling multiple files upload: {ex.Message}");
       await MessageBoxManager.GetMessageBoxStandard("Error", "Unexpected error occurred").ShowAsync();
       return false;
     }
@@ -252,8 +264,9 @@ internal class UploadService : IUploadService
         return false;
       }
     }
-    catch (Exception)
+    catch (Exception ex)
     {
+      Console.WriteLine($"Error uploading file: {ex.Message}");
       mainView.Status = NotificationService.Messages.UploadFail;
       await _notificationService.ShowNotificationAsync(mainView.Status);
       return false;

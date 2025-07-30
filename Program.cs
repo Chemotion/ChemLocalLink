@@ -1,4 +1,13 @@
-﻿using System;
+﻿/// <summary>
+/// Main entry point for the ChemLocalLink application
+///
+/// Initializes Avalonia UI framework and services
+/// Configures desktop notifications and icon providers
+/// Handles chemotion:// URL scheme links
+/// Starts the desktop application with logging and platform detection
+/// </summary>
+
+using System;
 using System.Diagnostics;
 using Avalonia;
 using DesktopNotifications;

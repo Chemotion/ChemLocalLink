@@ -1,4 +1,14 @@
-﻿using System;
+﻿/// <summary>
+/// Handles JWT token parsing, validation, and authentication
+///
+/// Extracts token parameters from Chemotion URLs
+/// Parses and validates token expiration for secure API access
+/// Fetches fresh tokens from Chemotion API as needed
+/// Manages errors related to token format and network issues
+/// Used by ProcessHelper and FileService for authentication
+/// </summary>
+
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -30,29 +40,26 @@ internal class TokenService : ITokenService
     try
     {
       var tokenParameters = GetTokenParameters(mainWindowView.Url!);
-      if (true)
+      var response = await _httpClient.GetAsync(
+        _apiHelper.TokenUrl(tokenParameters["attID"].ToString(), tokenParameters["appID"].ToString())
+      );
+
+      if (response.IsSuccessStatusCode)
       {
-        var response = await _httpClient.GetAsync(
-          _apiHelper.TokenUrl(tokenParameters["attID"].ToString(), tokenParameters["appID"].ToString())
-        );
+        var content = await response.Content.ReadAsStringAsync();
 
-        if (response.IsSuccessStatusCode)
+        if (!string.IsNullOrEmpty(content))
         {
-          var content = await response.Content.ReadAsStringAsync();
-
-          if (!string.IsNullOrEmpty(content))
-          {
-            mainWindowView.AuthToken = content;
-          }
-          else
-          {
-            throw new InvalidOperationException("Failed to parse auth token from response content.");
-          }
+          mainWindowView.AuthToken = content;
         }
         else
         {
-          throw new HttpRequestException($"Failed to fetch auth token. Status code: {response.StatusCode}");
+          throw new InvalidOperationException("Failed to parse auth token from response content.");
         }
+      }
+      else
+      {
+        throw new HttpRequestException($"Failed to fetch auth token. Status code: {response.StatusCode}");
       }
     }
     catch (HttpRequestException ex)

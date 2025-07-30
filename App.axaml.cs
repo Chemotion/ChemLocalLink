@@ -1,4 +1,14 @@
-﻿using System;
+﻿/// <summary>
+/// Main application class for ChemLocalLink
+///
+/// Manages app lifecycle and startup logic
+/// Sets up dependency injection and services
+/// Ensures only one instance runs at a time
+/// Handles chemotion:// URL arguments
+/// Initializes main window and view model
+/// </summary>
+
+using System;
 using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -58,9 +68,9 @@ public class App : Application
           {
             process.Kill();
           }
-          catch (Exception)
+          catch (Exception ex)
           {
-            // ignored
+            Debug.WriteLine($"Failed to kill process {process.Id}: {ex.Message}");
           }
         }
       }

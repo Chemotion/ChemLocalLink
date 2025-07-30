@@ -1,3 +1,12 @@
+/// <summary>
+/// Enables context menu command routing in Avalonia
+///
+/// Binds menu items to ViewModel methods via string-based commands
+/// Supports file actions like upload, delete, and open
+/// Simplifies context menu logic in the Downloads view
+/// Handles event attachment and cleanup
+/// </summary>
+
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Xaml.Interactivity;

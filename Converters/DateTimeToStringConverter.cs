@@ -1,3 +1,13 @@
+/// <summary>
+/// Converts DateTime and Unix timestamps to formatted strings
+///
+/// Supports DateTime and long (Unix timestamp) inputs
+/// Formats as "dd/MM/yyyy h:mm tt" with local time conversion
+/// Handles time zones and daylight saving automatically
+/// Returns "Unknown" for null or invalid inputs
+/// Used in XAML to display timestamps consistently
+/// </summary>
+
 using System;
 using System.Globalization;
 using Avalonia.Data.Converters;

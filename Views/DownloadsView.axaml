@@ -9,7 +9,7 @@
              xmlns:behaviors="clr-namespace:ChemLocalLink.Behaviors"
              xmlns:i="https://github.com/avaloniaui"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ChemLocalLink.UserControls.Downloads"
+             x:Class="ChemLocalLink.Views.DownloadsView"
              x:DataType="viewModels:MainWindowViewModel"
              x:Name="parent">
 

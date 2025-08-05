@@ -39,7 +39,7 @@ public class App : Application
       services.AddApplicationServices(Program.NotificationManager);
       _serviceProvider = services.BuildServiceProvider();
 
-      var mw = new MainWindow();
+      var mw = new MainWindowView();
       var viewModel = _serviceProvider.GetRequiredService<MainWindowViewModel>();
       var windowHelper = _serviceProvider.GetRequiredService<IWindowHelper>();
 

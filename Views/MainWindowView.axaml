@@ -1,6 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="ChemLocalLink.Views.MainWindow"
+        x:Class="ChemLocalLink.Views.MainWindowView"
         Title="ChemLocalLink"
         Width="600"
         MinWidth="600"
@@ -10,7 +10,7 @@
         xmlns:i="https://github.com/projektanker/icons.avalonia"
         xmlns:viewModels="clr-namespace:ChemLocalLink.ViewModels"
         xmlns:converters="clr-namespace:ChemLocalLink.Converters"
-        xmlns:userControls="clr-namespace:ChemLocalLink.UserControls"
+        xmlns:views="clr-namespace:ChemLocalLink.Views"
         ExtendClientAreaToDecorationsHint="True"
         WindowStartupLocation="Manual"
         SystemDecorations="Full"
@@ -93,7 +93,7 @@
 
                   </StackPanel>
 
-                  <userControls:Downloads Grid.Row="1" />
+                  <views:DownloadsView Grid.Row="1" />
                   <TextBlock Grid.Row="1" Margin="5, 20,5,5"
                              IsVisible="{Binding !HasFilesDownloaded}"
                              TextWrapping="Wrap"

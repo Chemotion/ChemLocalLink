@@ -36,7 +36,7 @@ namespace ChemLocalLink.Helpers;
 public interface IWindowHelper
 {
   MainWindowViewModel? MainWindowViewModel { get; set; }
-  MainWindow? MainWindow { get; set; }
+  MainWindowView? MainWindow { get; set; }
   void Deactivate(MainWindowViewModel mainWindowView);
   void Load(MainWindowViewModel mainWindowView);
   void ShowWindow();
@@ -49,7 +49,7 @@ public class WindowHelper : IWindowHelper
   private readonly IProcessHelper _processHelper;
 
   public MainWindowViewModel? MainWindowViewModel { get; set; }
-  public MainWindow? MainWindow { get; set; }
+  public MainWindowView? MainWindow { get; set; }
 
   public WindowHelper(ITrayService trayService, INotificationService notificationService, IProcessHelper processHelper)
   {

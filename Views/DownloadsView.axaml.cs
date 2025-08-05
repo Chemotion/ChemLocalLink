@@ -11,11 +11,11 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace ChemLocalLink.UserControls;
+namespace ChemLocalLink.Views;
 
-public partial class Downloads : UserControl
+public partial class DownloadsView : UserControl
 {
-  public Downloads()
+  public DownloadsView()
   {
     InitializeComponent();
   }

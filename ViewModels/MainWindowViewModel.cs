@@ -41,7 +41,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
   internal Timer.Timer? fileMonitorTimer;
   internal DateTime lastInteractionTime;
   internal bool isMinimizedByIdleTimer = false;
-  internal MainWindow? mainWindow;
+  internal MainWindowView? mainWindow;
   internal string[]? args;
   internal readonly IDownloadService _downloadService;
   internal readonly IUploadService _uploadService;
@@ -139,7 +139,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     Process = new RelayCommand<Task>(_ => Task.Run(async () => await ProcessCommand()));
   }
 
-  public void Initialize(MainWindow mainWindow, string[] args)
+  public void Initialize(MainWindowView mainWindow, string[] args)
   {
     this.mainWindow = mainWindow;
     this.args = args ?? throw new ArgumentNullException(nameof(args));

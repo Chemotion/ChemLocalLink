@@ -13,7 +13,7 @@ using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using ChemLocalLink.DependencyInjection;
+using ChemLocalLink.Extensions;
 using ChemLocalLink.Helpers;
 using ChemLocalLink.ViewModels;
 using ChemLocalLink.Views;

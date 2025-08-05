@@ -17,7 +17,7 @@ using DesktopNotifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace ChemLocalLink.DependencyInjection;
+namespace ChemLocalLink.Extensions;
 
 public static class ServiceCollectionExtensions
 {

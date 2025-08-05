@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 /// Extension methods for configuring Avalonia AppBuilder
 ///
 /// Sets up platform-specific desktop notifications
@@ -15,7 +15,7 @@ using DesktopNotifications;
 using DesktopNotifications.FreeDesktop;
 using DesktopNotifications.Windows;
 
-namespace ChemLocalLink;
+namespace ChemLocalLink.Extensions;
 
 public static class AppBuilderExtensions
 {

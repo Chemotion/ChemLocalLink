@@ -7,7 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ChemLocalLink.Models;
 
-public partial class Downloads : ObservableObject
+public partial class DownloadModel : ObservableObject
 {
   // FileId to keep track of edited files in a list
   public float FileId { get; set; }

@@ -8,11 +8,11 @@ using Avalonia.Xaml.Interactivity;
 using ChemLocalLink.ViewModels;
 using CommunityToolkit.Mvvm.Input;
 
-namespace ChemLocalLink.Behaviors;
+namespace ChemLocalLink.Extensions;
 
-public class MenuItemBehavior : Behavior<MenuItem>
+public class WindowMenuBehavior : Behavior<MenuItem>
 {
-  public static readonly StyledProperty<object> ViewModelProperty = AvaloniaProperty.Register<MenuItemBehavior, object>(
+  public static readonly StyledProperty<object> ViewModelProperty = AvaloniaProperty.Register<WindowMenuBehavior, object>(
     nameof(ViewModel)
   );
 
@@ -21,7 +21,7 @@ public class MenuItemBehavior : Behavior<MenuItem>
     get => GetValue(ViewModelProperty);
     set => SetValue(ViewModelProperty, value);
   }
-  public static readonly StyledProperty<object> CommandsProperty = AvaloniaProperty.Register<MenuItemBehavior, object>(
+  public static readonly StyledProperty<object> CommandsProperty = AvaloniaProperty.Register<WindowMenuBehavior, object>(
     nameof(IRelayCommand)
   );
 

@@ -13,7 +13,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using ChemLocalLink.Extensions;
-using ChemLocalLink.Helpers;
+using ChemLocalLink.Services;
 using ChemLocalLink.ViewModels;
 using ChemLocalLink.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,7 +40,7 @@ public class App : Application
 
       var mw = new MainWindowView();
       var viewModel = _serviceProvider.GetRequiredService<MainWindowViewModel>();
-      var windowHelper = _serviceProvider.GetRequiredService<IWindowHelper>();
+      var windowService = _serviceProvider.GetRequiredService<IWindowService>();
 
       viewModel.Initialize(mw, desktop.Args ?? []);
 

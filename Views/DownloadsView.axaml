@@ -4,9 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:ChemLocalLink.ViewModels"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
-             xmlns:converters="clr-namespace:ChemLocalLink.Converters"
+             xmlns:converters="clr-namespace:ChemLocalLink.Extensions"
              xmlns:avalonia="https://github.com/projektanker/icons.avalonia"
-             xmlns:behaviors="clr-namespace:ChemLocalLink.Behaviors"
+             xmlns:extensions="clr-namespace:ChemLocalLink.Extensions"
              xmlns:i="https://github.com/avaloniaui"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ChemLocalLink.Views.DownloadsView"
@@ -37,32 +37,32 @@
             <ContextMenu>
               <MenuItem Header="Upload &amp; delete locally">
                 <Interaction.Behaviors>
-                  <behaviors:MenuItemBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
-                                              Commands="uploadndelete" />
+                  <extensions:WindowMenuBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
+                                                 Commands="uploadndelete" />
                 </Interaction.Behaviors>
               </MenuItem>
               <MenuItem Header="Upload &amp; keep locally">
                 <Interaction.Behaviors>
-                  <behaviors:MenuItemBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
-                                              Commands="uploadnkeep" />
+                  <extensions:WindowMenuBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
+                                                 Commands="uploadnkeep" />
                 </Interaction.Behaviors>
               </MenuItem>
               <MenuItem Header="Delete file locally">
                 <Interaction.Behaviors>
-                  <behaviors:MenuItemBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
-                                              Commands="deleteFile" />
+                  <extensions:WindowMenuBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
+                                                 Commands="deleteFile" />
                 </Interaction.Behaviors>
               </MenuItem>
               <MenuItem Header="Open file">
                 <Interaction.Behaviors>
-                  <behaviors:MenuItemBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
-                                              Commands="openFile" />
+                  <extensions:WindowMenuBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
+                                                 Commands="openFile" />
                 </Interaction.Behaviors>
               </MenuItem>
               <MenuItem Header="Open folder">
                 <Interaction.Behaviors>
-                  <behaviors:MenuItemBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
-                                              Commands="openDir" />
+                  <extensions:WindowMenuBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
+                                                 Commands="openDir" />
                 </Interaction.Behaviors>
               </MenuItem>
             </ContextMenu>

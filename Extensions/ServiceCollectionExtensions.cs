@@ -4,7 +4,6 @@
 
 using System;
 using System.Net.Http;
-using ChemLocalLink.Helpers;
 using ChemLocalLink.Services;
 using ChemLocalLink.ViewModels;
 using DesktopNotifications;
@@ -29,24 +28,18 @@ public static class ServiceCollectionExtensions
       return httpClient;
     });
 
-    // notification manager and service
+    // Services
     if (notificationManager != null)
     {
       services.AddSingleton(notificationManager);
     }
     services.AddSingleton<INotificationService, NotificationService>();
-
-    // services
-    services.AddSingleton<IDownloadService, DownloadService>();
-    services.AddSingleton<IUploadService, UploadService>();
-    services.AddSingleton<IFileService, FileService>();
-    services.AddSingleton<ITokenService, TokenService>();
+    services.AddSingleton<IApiService, ApiService>();
+    services.AddSingleton<IJsonDataService, JsonDataService>();
+    services.AddSingleton<IFileOpsService, FileOpsService>();
+    services.AddSingleton<IWorkflowService, WorkflowService>();
     services.AddSingleton<ITrayService, TrayService>();
-
-    // helpers
-    services.AddSingleton<IApiHelper, ApiHelper>();
-    services.AddSingleton<IWindowHelper, WindowHelper>();
-    services.AddSingleton<IProcessHelper, ProcessHelper>();
+    services.AddSingleton<IWindowService, WindowService>();
 
     // ViewModels
     services.AddTransient<MainWindowViewModel>();

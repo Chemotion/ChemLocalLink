@@ -3,6 +3,7 @@
              x:Class="ChemLocalLink.App"
              xmlns:local="using:ChemLocalLink"
              xmlns:behaviors="clr-namespace:ChemLocalLink.Behaviors"
+             xmlns:extensions="clr-namespace:ChemLocalLink.Extensions"
              RequestedThemeVariant="Dark">
   <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
@@ -18,7 +19,7 @@
                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
                               ToolTip.Tip="Only enabled when a file is selected!"
                               IsEnabled="False"
-                              behaviors:ShowDisabledTooltipExtension.ShowOnDisabled="True"
+                              extensions:ShowTooltipExtension.ShowOnDisabled="True"
                               Foreground="Gray"/>
             </ControlTemplate>
           </Setter>

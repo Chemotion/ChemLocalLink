@@ -19,15 +19,14 @@ using Avalonia.Platform;
 using Avalonia.Threading;
 using ChemLocalLink.Extensions;
 using ChemLocalLink.Models;
-using ChemLocalLink.Services;
 using ChemLocalLink.ViewModels;
 using ChemLocalLink.Views;
 using DesktopNotifications;
 using Newtonsoft.Json;
 
-namespace ChemLocalLink.Helpers;
+namespace ChemLocalLink.Services;
 
-public interface IWindowHelper
+public interface IWindowService
 {
   MainWindowViewModel? MainWindowViewModel { get; set; }
   MainWindowView? MainWindow { get; set; }
@@ -36,20 +35,24 @@ public interface IWindowHelper
   void ShowWindow();
 }
 
-public class WindowHelper : IWindowHelper
+public class WindowService : IWindowService
 {
   private readonly ITrayService _trayService;
   private readonly INotificationService _notificationService;
-  private readonly IProcessHelper _processHelper;
+  private readonly IWorkflowService _workflowService;
 
   public MainWindowViewModel? MainWindowViewModel { get; set; }
   public MainWindowView? MainWindow { get; set; }
 
-  public WindowHelper(ITrayService trayService, INotificationService notificationService, IProcessHelper processHelper)
+  public WindowService(
+    ITrayService trayService,
+    INotificationService notificationService,
+    IWorkflowService workflowService
+  )
   {
     _trayService = trayService;
     _notificationService = notificationService;
-    _processHelper = processHelper;
+    _workflowService = workflowService;
   }
 
   public void Deactivate(MainWindowViewModel mainWindowView)
@@ -85,7 +88,7 @@ public class WindowHelper : IWindowHelper
         if (File.Exists(filePath) && !string.IsNullOrEmpty(File.ReadAllText(filePath)))
         {
           var data = File.ReadAllText(filePath);
-          var downloads = JsonConvert.DeserializeObject<ObservableCollection<Downloads>>(data);
+          var downloads = JsonConvert.DeserializeObject<ObservableCollection<DownloadModel>>(data);
 
           if (downloads == null || downloads.Count == 0)
           {
@@ -139,7 +142,7 @@ public class WindowHelper : IWindowHelper
           }
 
           mainWindowView.Url = parsedUrl;
-          await _processHelper.HandleProcess(mainWindowView, parsedUrl);
+          await _workflowService.HandleProcess(mainWindowView, parsedUrl);
         }
       }
       catch (Exception ex)

@@ -8,13 +8,13 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 
-namespace ChemLocalLink.Behaviors;
+namespace ChemLocalLink.Extensions;
 
 //source: https://github.com/AvaloniaUI/Avalonia/issues/3847#issuecomment-1618790059
-public static class ShowDisabledTooltipExtension
+public static class ShowTooltipExtension
 {
   #region Constructors
-  static ShowDisabledTooltipExtension()
+  static ShowTooltipExtension()
   {
     ShowOnDisabledProperty.Changed.AddClassHandler<Control>((x, y) => HandleShowOnDisabledChanged(x, y));
   }

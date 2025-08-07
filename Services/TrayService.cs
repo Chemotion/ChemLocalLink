@@ -8,7 +8,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform;
 using Avalonia.Threading;
-using ChemLocalLink.Helpers;
 using ChemLocalLink.ViewModels;
 using CommunityToolkit.Mvvm.Input;
 
@@ -16,7 +15,7 @@ namespace ChemLocalLink.Services;
 
 public interface ITrayService
 {
-  void InitializeTray(MainWindowViewModel viewModel, IWindowHelper windowHelper);
+  void InitializeTray(MainWindowViewModel viewModel, IWindowService windowService);
 }
 
 public class TrayService : ITrayService
@@ -26,7 +25,7 @@ public class TrayService : ITrayService
 
   public TrayService() { }
 
-  public void InitializeTray(MainWindowViewModel viewModel, IWindowHelper windowHelper)
+  public void InitializeTray(MainWindowViewModel viewModel, IWindowService windowService)
   {
     _mainWindowViewModel = viewModel;
 
@@ -39,7 +38,7 @@ public class TrayService : ITrayService
         {
           Dispatcher.UIThread.Invoke(() =>
           {
-            windowHelper.ShowWindow();
+            windowService.ShowWindow();
           });
         })
       },
@@ -99,6 +98,6 @@ public class TrayService : ITrayService
     };
 
     // wire up events
-    _notifyIcon.Clicked += (sender, e) => windowHelper.ShowWindow();
+    _notifyIcon.Clicked += (sender, e) => windowService.ShowWindow();
   }
 }

@@ -5,7 +5,7 @@
 using System;
 using Avalonia.Data.Converters;
 
-namespace ChemLocalLink.Converters;
+namespace ChemLocalLink.Extensions;
 
 public class IndexToBooleanConverter : IValueConverter
 {

@@ -18,7 +18,7 @@ public static class HttpClientExtension
   public static async Task<(HttpResponseMessage Response, byte[] Content)> GetWithProgressAsync(
     this HttpClient client,
     string requestUri,
-    IProgress<ProgressInfo> progress,
+    IProgress<ProgressModel> progress,
     CancellationToken cancellationToken = default
   )
   {
@@ -41,7 +41,7 @@ public static class HttpClientExtension
     this HttpClient client,
     string requestUri,
     HttpContent content,
-    IProgress<ProgressInfo> progress,
+    IProgress<ProgressModel> progress,
     CancellationToken cancellationToken = default,
     bool isUpload = false
   )
@@ -63,7 +63,7 @@ public static class HttpClientExtension
 
   private static async Task UploadWithProgressAsync(
     HttpContent content,
-    IProgress<ProgressInfo> progress,
+    IProgress<ProgressModel> progress,
     CancellationToken cancellationToken
   )
   {
@@ -85,18 +85,18 @@ public static class HttpClientExtension
       if (totalBytesRead - totalReportedRead >= BufferSize)
       {
         var percentage = totalBytesExpected > 0 ? (double)totalBytesRead / totalBytesExpected * 100 : -1;
-        progress.Report(new ProgressInfo(totalBytesRead, totalBytesExpected, percentage));
+        progress.Report(new ProgressModel(totalBytesRead, totalBytesExpected, percentage));
         totalReportedRead = totalBytesRead;
       }
     }
 
     var finalPercentage = totalBytesExpected > 0 ? (double)totalBytesRead / totalBytesExpected * 100 : -1;
-    progress.Report(new ProgressInfo(totalBytesRead, totalBytesExpected, finalPercentage));
+    progress.Report(new ProgressModel(totalBytesRead, totalBytesExpected, finalPercentage));
   }
 
   private static async Task<byte[]> ProcessResponseAsync(
     HttpResponseMessage responseMessage,
-    IProgress<ProgressInfo> progress,
+    IProgress<ProgressModel> progress,
     CancellationToken cancellationToken
   )
   {
@@ -120,13 +120,13 @@ public static class HttpClientExtension
       if (totalBytesRead - totalReportedRead >= BufferSize)
       {
         var percentage = totalBytesExpected > 0 ? (double)totalBytesRead / totalBytesExpected * 100 : -1;
-        progress.Report(new ProgressInfo(totalBytesRead, totalBytesExpected, percentage));
+        progress.Report(new ProgressModel(totalBytesRead, totalBytesExpected, percentage));
         totalReportedRead = totalBytesRead;
       }
     }
 
     var finalPercentage = totalBytesExpected > 0 ? (double)totalBytesRead / totalBytesExpected * 100 : -1;
-    progress.Report(new ProgressInfo(totalBytesRead, totalBytesExpected, finalPercentage));
+    progress.Report(new ProgressModel(totalBytesRead, totalBytesExpected, finalPercentage));
 
     return contentBytes.ToArray();
   }

@@ -15,7 +15,6 @@ using Avalonia.Input;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using ChemLocalLink.Extensions;
-using ChemLocalLink.Helpers;
 using ChemLocalLink.Models;
 using ChemLocalLink.Services;
 using ChemLocalLink.Views;
@@ -37,14 +36,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
   internal bool isMinimizedByIdleTimer = false;
   internal MainWindowView? mainWindow;
   internal string[]? args;
-  internal readonly IDownloadService _downloadService;
-  internal readonly IUploadService _uploadService;
-  internal readonly IFileService _fileService;
-  internal readonly ITokenService _tokenService;
+  internal readonly IFileOpsService _fileOpsService;
+  internal readonly IApiService _apiService;
   internal readonly ITrayService _trayService;
-  internal readonly IApiHelper _apiHelper;
-  internal readonly IWindowHelper _windowHelper;
-  internal readonly IProcessHelper _processHelper;
+  internal readonly IWindowService _windowService;
+  internal readonly IWorkflowService _workflowService;
+  internal readonly IJsonDataService _jsonDataService;
   internal Process? _fileProcess;
 
   [ObservableProperty]
@@ -53,7 +50,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
   [ObservableProperty]
   [NotifyPropertyChangedFor(nameof(HasFilesDownloaded))]
-  ObservableCollection<Downloads> _downloadedFiles = [];
+  ObservableCollection<DownloadModel> _downloadedFiles = [];
 
   [ObservableProperty]
   private ObservableCollection<float> _editedFileIds = [];
@@ -102,34 +99,30 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     ThemeButtonIcon = value ? "fa-solid fa-lightbulb" : "fa-regular fa-lightbulb";
     ThemeToolTip = value ? "Switch to Light Mode" : "Switch to Dark Mode";
     Application.Current!.RequestedThemeVariant = value ? ThemeVariant.Dark : ThemeVariant.Light;
-    Theme.SaveCurrentTheme(value);
+    _jsonDataService.SaveCurrentTheme(value);
   }
 
   public MainWindowViewModel(
     HttpClient httpClient,
-    IDownloadService downloadService,
-    IUploadService uploadService,
-    IFileService fileService,
-    ITokenService tokenService,
+    IFileOpsService fileOpsService,
+    IApiService apiService,
     ITrayService trayService,
-    IApiHelper apiHelper,
-    IWindowHelper windowHelper,
+    IWindowService windowService,
     INotificationService notificationService,
-    IProcessHelper processHelper
+    IWorkflowService workflowService,
+    IJsonDataService jsonDataService
   )
   {
     _httpClient = httpClient;
-    _downloadService = downloadService;
-    _uploadService = uploadService;
-    _fileService = fileService;
-    _tokenService = tokenService;
+    _fileOpsService = fileOpsService;
+    _apiService = apiService;
     _trayService = trayService;
-    _apiHelper = apiHelper;
-    _windowHelper = windowHelper;
+    _windowService = windowService;
     _notificationService = notificationService;
-    _processHelper = processHelper;
+    _workflowService = workflowService;
+    _jsonDataService = jsonDataService;
 
-    IsDarkMode = Theme.LoadCurrentTheme();
+    IsDarkMode = _jsonDataService.LoadCurrentTheme();
     Process = new RelayCommand<Task>(_ => Task.Run(async () => await ProcessCommand()));
   }
 
@@ -138,9 +131,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     this.mainWindow = mainWindow;
     this.args = args ?? throw new ArgumentNullException(nameof(args));
 
-    // Set references in the WindowHelper
-    _windowHelper.MainWindow = mainWindow;
-    _windowHelper.MainWindowViewModel = this;
+    // Set references in the WindowService
+    _windowService.MainWindow = mainWindow;
+    _windowService.MainWindowViewModel = this;
 
     SetupEventHandlers();
   }
@@ -150,13 +143,13 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     if (mainWindow != null)
     {
       mainWindow.Loaded += MainWindow_Loaded;
-      mainWindow.Deactivated += (s, e) => _windowHelper.Deactivate(this);
+      mainWindow.Deactivated += (s, e) => _windowService.Deactivate(this);
     }
   }
 
   private void MainWindow_Loaded(object? sender, EventArgs e)
   {
-    _windowHelper.Load(this);
+    _windowService.Load(this);
     fileMonitorTimer = new Timer.Timer(5000); // Check for file changes every 5 seconds instead of 1ms
     fileMonitorTimer.Elapsed += OnTimedEvent;
     fileMonitorTimer.Enabled = true;
@@ -166,7 +159,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
   {
     try
     {
-      var downloadedFiles = _windowHelper.MainWindowViewModel?.DownloadedFiles;
+      var downloadedFiles = _windowService.MainWindowViewModel?.DownloadedFiles;
       if (downloadedFiles == null)
         return;
 
@@ -185,11 +178,11 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         if (!fileSumOnDisk.Equals(fileSumOnDownload))
         {
           if (
-            _windowHelper.MainWindowViewModel != null
-            && !_windowHelper.MainWindowViewModel.EditedFileIds.Contains(file.FileId)
+            _windowService.MainWindowViewModel != null
+            && !_windowService.MainWindowViewModel.EditedFileIds.Contains(file.FileId)
           )
           {
-            _windowHelper.MainWindowViewModel.EditedFileIds.Add(file.FileId);
+            _windowService.MainWindowViewModel.EditedFileIds.Add(file.FileId);
           }
 
           var downloadedFile = DownloadedFiles[DownloadedFiles.IndexOf(file)];
@@ -248,10 +241,10 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
   public RelayCommand<Task> Process;
 
-  public async Task ProcessCommand() => await _processHelper.HandleProcess(this, Url!);
+  public async Task ProcessCommand() => await _workflowService.HandleProcess(this, Url!);
 
   [RelayCommand]
-  public async Task<bool> UploadFiles(string role) => await _uploadService.UploadEditedFiles(this, role);
+  public async Task<bool> UploadFiles(string role) => await _fileOpsService.UploadEditedFiles(this, role);
 
   [RelayCommand]
   public void DeleteSelectedFile()

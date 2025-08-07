@@ -1,23 +1,27 @@
-﻿/// <summary>
-/// Builds Chemotion API URLs for download and upload
+/// <summary>
+/// Handles Chemotion API URLs and JWT token operations
 /// </summary>
 
 using System;
-using ChemLocalLink.Services;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
 
-namespace ChemLocalLink.Helpers;
+namespace ChemLocalLink.Services;
 
-public interface IApiHelper
+public interface IApiService
 {
   string ApiHost { get; set; }
   string ApiEndpoint { get; set; }
   string DownloadUrl(string token);
   string UploadUrl(string authToken);
   void SetFromUrl(string url);
+  JwtPayload GetTokenParameters(string token);
+  long TokenExp(string token);
 }
 
-internal class ApiHelper : IApiHelper
+internal class ApiService : IApiService
 {
+  private readonly HttpClient _httpClient;
   private string? _apiHost = "";
   private string? _apiEndpoint = "";
 
@@ -33,7 +37,10 @@ internal class ApiHelper : IApiHelper
     set => _apiEndpoint = value;
   }
 
-  public ApiHelper() { }
+  public ApiService(HttpClient httpClient)
+  {
+    _httpClient = httpClient;
+  }
 
   public void SetFromUrl(string url)
   {
@@ -51,4 +58,17 @@ internal class ApiHelper : IApiHelper
   public string DownloadUrl(string token) => $"{ApiHost}/{ApiEndpoint}/{token}";
 
   public string UploadUrl(string authToken) => $"{ApiHost}/{ApiEndpoint}/{authToken}";
+
+  public JwtPayload GetTokenParameters(string url)
+  {
+    var handler = new JwtSecurityTokenHandler();
+    var token = url[(url.LastIndexOf('/') + 1)..];
+
+    return handler.ReadToken(token) is not JwtSecurityToken jsonToken ? [] : jsonToken.Payload;
+  }
+
+  public long TokenExp(string token)
+  {
+    return GetTokenParameters(token).Expiration ?? 0;
+  }
 }

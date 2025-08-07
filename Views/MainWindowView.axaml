@@ -9,7 +9,7 @@
         Icon="/Assets/icon.ico"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
         xmlns:viewModels="clr-namespace:ChemLocalLink.ViewModels"
-        xmlns:converters="clr-namespace:ChemLocalLink.Converters"
+        xmlns:converters="clr-namespace:ChemLocalLink.Extensions"
         xmlns:views="clr-namespace:ChemLocalLink.Views"
         ExtendClientAreaToDecorationsHint="True"
         WindowStartupLocation="Manual"

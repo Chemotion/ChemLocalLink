@@ -1,5 +1,5 @@
-﻿/// <summary>
-/// Coordinates chemotion:// URL processing and file download workflow
+/// <summary>
+/// Orchestrates the main workflow for processing chemotion:// URLs and coordinating file operations
 /// </summary>
 
 using System;
@@ -7,34 +7,24 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using ChemLocalLink.Extensions;
-using ChemLocalLink.Services;
 using ChemLocalLink.ViewModels;
 
-namespace ChemLocalLink.Helpers;
+namespace ChemLocalLink.Services;
 
-public interface IProcessHelper
+public interface IWorkflowService
 {
   Task HandleProcess(MainWindowViewModel mainWindowView, string url);
 }
 
-internal class ProcessHelper : IProcessHelper
+internal class WorkflowService : IWorkflowService
 {
-  private readonly IDownloadService _downloadService;
-  private readonly ITokenService _tokenService;
+  private readonly IFileOpsService _fileOpsService;
   private readonly INotificationService _notificationService;
-  private readonly IFileService _fileService;
 
-  public ProcessHelper(
-    IDownloadService downloadService,
-    ITokenService tokenService,
-    INotificationService notificationService,
-    IFileService fileService
-  )
+  public WorkflowService(IFileOpsService fileOpsService, INotificationService notificationService)
   {
-    _downloadService = downloadService;
-    _tokenService = tokenService;
+    _fileOpsService = fileOpsService;
     _notificationService = notificationService;
-    _fileService = fileService;
   }
 
   public async Task HandleProcess(MainWindowViewModel mainWindowView, string _url)
@@ -70,7 +60,7 @@ internal class ProcessHelper : IProcessHelper
         if (!string.IsNullOrEmpty(_url) && mainWindowView.Url != _url)
           mainWindowView.Url = _url;
         var token = _url.ExtractAuthToken();
-        var downloadedFile = await _downloadService.DownloadFile(mainWindowView, token!);
+        var downloadedFile = await _fileOpsService.DownloadFile(mainWindowView, token!);
         mainWindowView._filePath = downloadedFile?.filePath ?? null;
         if (mainWindowView._filePath == null)
         {
@@ -79,7 +69,7 @@ internal class ProcessHelper : IProcessHelper
           return;
         }
 
-        await _fileService.ProcessFile(mainWindowView._filePath, mainWindowView, downloadedFile?.originalName ?? "");
+        await _fileOpsService.ProcessFile(mainWindowView._filePath, mainWindowView, downloadedFile?.originalName ?? "");
         mainWindowView.Status = NotificationService.Messages.DownloadSuccessful;
         await _notificationService.ShowNotificationAsync(mainWindowView.Status);
       }

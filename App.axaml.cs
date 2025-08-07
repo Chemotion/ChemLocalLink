@@ -1,10 +1,5 @@
 ﻿/// <summary>
-/// Main application class for ChemLocalLink
-/// Manages app lifecycle and startup logic
-/// Sets up dependency injection and services
-/// Ensures only one instance runs at a time
-/// Handles chemotion:// URL arguments
-/// Initializes main window and view model
+/// Main application class
 /// </summary>
 
 using System;
@@ -12,8 +7,8 @@ using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using ChemLocalLink.Utilities;
 using ChemLocalLink.Services;
+using ChemLocalLink.Utilities;
 using ChemLocalLink.ViewModels;
 using ChemLocalLink.Views;
 using Microsoft.Extensions.DependencyInjection;

@@ -12,18 +12,20 @@ namespace ChemLocalLink.Utilities;
 
 public class WindowMenuBehavior : Behavior<MenuItem>
 {
-  public static readonly StyledProperty<object> ViewModelProperty = AvaloniaProperty.Register<WindowMenuBehavior, object>(
-    nameof(ViewModel)
-  );
+  public static readonly StyledProperty<object> ViewModelProperty = AvaloniaProperty.Register<
+    WindowMenuBehavior,
+    object
+  >(nameof(ViewModel));
 
   public object ViewModel
   {
     get => GetValue(ViewModelProperty);
     set => SetValue(ViewModelProperty, value);
   }
-  public static readonly StyledProperty<object> CommandsProperty = AvaloniaProperty.Register<WindowMenuBehavior, object>(
-    nameof(IRelayCommand)
-  );
+  public static readonly StyledProperty<object> CommandsProperty = AvaloniaProperty.Register<
+    WindowMenuBehavior,
+    object
+  >(nameof(IRelayCommand));
 
   public object Commands
   {

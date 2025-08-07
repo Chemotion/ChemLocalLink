@@ -8,7 +8,6 @@ using ChemLocalLink.Services;
 using ChemLocalLink.ViewModels;
 using DesktopNotifications;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ChemLocalLink.Utilities;
 

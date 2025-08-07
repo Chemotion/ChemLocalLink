@@ -3,25 +3,18 @@
 /// </summary>
 
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Platform;
 using Avalonia.Threading;
-using ChemLocalLink.Utilities;
 using ChemLocalLink.Models;
+using ChemLocalLink.Utilities;
 using ChemLocalLink.ViewModels;
 using ChemLocalLink.Views;
-using DesktopNotifications;
 using Newtonsoft.Json;
 
 namespace ChemLocalLink.Services;

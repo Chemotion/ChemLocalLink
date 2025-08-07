@@ -1,11 +1,5 @@
 ﻿/// <summary>
 /// Main view model managing app state, file operations, and UI logic
-///
-/// Handles chemotion:// URL processing, downloads, and uploads
-/// Monitors files for external edits using periodic checksums
-/// Manages theme, idle timer, and window state
-/// Binds data and commands to MainWindow UI
-/// Implements IDisposable for resource cleanup
 /// </summary>
 
 using System;

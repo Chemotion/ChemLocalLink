@@ -1,12 +1,8 @@
 ﻿/// <summary>
-/// Builds Chemotion API URLs for download, upload, and token operations
-///
-/// Dynamically sets API host from chemotion:// links
-/// Constructs versioned endpoints with token and ID parameters
-/// Ensures consistent API paths for third-party app integration
-/// Used by services to communicate with Chemotion ELN
+/// Builds Chemotion API URLs for download and upload
 /// </summary>
 
+using System;
 using ChemLocalLink.Services;
 
 namespace ChemLocalLink.Helpers;
@@ -14,17 +10,16 @@ namespace ChemLocalLink.Helpers;
 public interface IApiHelper
 {
   string ApiHost { get; set; }
+  string ApiEndpoint { get; set; }
   string DownloadUrl(string token);
   string UploadUrl(string authToken);
-  string TokenUrl(string? attId, string? appId);
+  void SetFromUrl(string url);
 }
 
 internal class ApiHelper : IApiHelper
 {
   private string? _apiHost = "";
-  private readonly string _downloadEndPoint = "api/v1/public/third_party_apps";
-  private readonly string _uploadEndPoint = "api/v1/public/third_party_apps";
-  private readonly string _tokenEndPoint = "api/v1/third_party_apps/token";
+  private string? _apiEndpoint = "";
 
   public string ApiHost
   {
@@ -32,11 +27,28 @@ internal class ApiHelper : IApiHelper
     set => _apiHost = value;
   }
 
+  public string ApiEndpoint
+  {
+    get => _apiEndpoint ?? "";
+    set => _apiEndpoint = value;
+  }
+
   public ApiHelper() { }
 
-  public string DownloadUrl(string token) => $"{ApiHost}/{_downloadEndPoint}/{token}";
+  public void SetFromUrl(string url)
+  {
+    var uri = new Uri(url);
+    ApiHost = $"{uri.Scheme}://{uri.Host}";
 
-  public string UploadUrl(string authToken) => $"{ApiHost}/{_uploadEndPoint}/{authToken}";
+    var path = uri.AbsolutePath;
+    var lastSlashIndex = path.LastIndexOf('/');
+    if (lastSlashIndex > 0)
+    {
+      ApiEndpoint = path[1..lastSlashIndex];
+    }
+  }
 
-  public string TokenUrl(string? attId, string? appId) => $"{ApiHost}/{_tokenEndPoint}?attID={attId}&appId={appId}";
+  public string DownloadUrl(string token) => $"{ApiHost}/{ApiEndpoint}/{token}";
+
+  public string UploadUrl(string authToken) => $"{ApiHost}/{ApiEndpoint}/{authToken}";
 }

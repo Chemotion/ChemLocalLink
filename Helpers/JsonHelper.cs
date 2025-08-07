@@ -1,10 +1,5 @@
 /// <summary>
 /// Handles JSON serialization for download history and app state
-///
-/// Appends records to JSON arrays and writes to %AppData% directory
-/// Safely creates or modifies JSON files without data loss
-/// Ensures persistence of downloads.json across sessions
-/// Gracefully handles file errors and malformed JSON
 /// </summary>
 
 using System;

@@ -1,10 +1,5 @@
 /// <summary>
 /// Converts integer index to boolean for UI bindings
-///
-/// Returns true if index >= 0, false otherwise
-/// Used to enable or show elements based on selection
-/// ConvertBack not supported
-/// Applied in XAML bindings for selection-dependent UI logic
 /// </summary>
 
 using System;

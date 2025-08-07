@@ -1,11 +1,5 @@
 ﻿/// <summary>
 /// Manages window state, startup, and user interaction tracking
-///
-/// Handles chemotion:// URL arguments at startup
-/// Restores downloads and theme from previous sessions
-/// Manages window visibility, tray integration, and idle minimization
-/// Tracks user activity to auto-minimize after inactivity
-/// Bridges UI with services for a seamless user experience
 /// </summary>
 
 using System;

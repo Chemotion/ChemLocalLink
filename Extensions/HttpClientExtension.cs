@@ -1,11 +1,5 @@
 /// <summary>
 /// Extends HttpClient with upload and download progress tracking
-///
-/// Enables real-time progress updates for file transfers
-/// Supports efficient streaming with buffered reading
-/// Handles unknown content lengths and large files gracefully
-/// Reports bytes transferred and percentage completion
-/// Used by DownloadService and UploadService
 /// </summary>
 
 using System;

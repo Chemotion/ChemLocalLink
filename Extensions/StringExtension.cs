@@ -1,11 +1,5 @@
 /// <summary>
 /// Adds string utilities for file size formatting, URL parsing, and checksum
-///
-/// Converts byte sizes to readable format (e.g. MB, GB)
-/// Calculates SHA256 checksums for file change detection
-/// Parses and decodes chemotion:// URLs
-/// Extracts JWT tokens from API URLs
-/// Provides safe, reusable string operations across the app
 /// </summary>
 
 using System;

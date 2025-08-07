@@ -1,11 +1,5 @@
 /// <summary>
 /// Configures dependency injection for ChemLocalLink
-///
-/// Registers services, helpers, and view models in DI container
-/// Sets up HttpClient with timeout and custom User-Agent
-/// Adds platform-specific notification services
-/// Uses singleton for core services and transient for ViewModels
-/// Centralizes service registration for consistent lifetime management
 /// </summary>
 
 using System;

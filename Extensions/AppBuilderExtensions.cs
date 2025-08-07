@@ -1,11 +1,5 @@
 /// <summary>
 /// Extension methods for configuring Avalonia AppBuilder
-///
-/// Sets up platform-specific desktop notifications
-/// Detects OS and configures notification manager accordingly
-/// Supports Windows 10+ and Linux (FreeDesktop)
-/// Registers notification manager for dependency injection
-/// Hooks into application shutdown lifecycle
 /// </summary>
 
 using System;

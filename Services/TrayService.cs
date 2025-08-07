@@ -1,11 +1,5 @@
 ﻿/// <summary>
 /// Manages system tray icon, context menu, and user interactions
-///
-/// Adds tray icon with ChemLocalLink branding and tooltip
-/// Provides Reload and Exit options in context menu
-/// Handles click to restore main window from tray
-/// Supports app restart via tray menu
-/// Used by WindowHelper during startup
 /// </summary>
 
 using System;
@@ -40,7 +34,29 @@ public class TrayService : ITrayService
     {
       new NativeMenuItem
       {
-        Header = "Reload",
+        Header = "Open app",
+        Command = new RelayCommand(() =>
+        {
+          Dispatcher.UIThread.Invoke(() =>
+          {
+            windowHelper.ShowWindow();
+          });
+        })
+      },
+      new NativeMenuItem
+      {
+        Header = "Upload all edited files & delete locally",
+        Command = new AsyncRelayCommand(async () => await _mainWindowViewModel!.UploadFiles("delete"))
+      },
+      new NativeMenuItem
+      {
+        Header = "Upload all edited files & keep locally",
+        Command = new AsyncRelayCommand(async () => await _mainWindowViewModel!.UploadFiles(""))
+      },
+      new NativeMenuItemSeparator(),
+      new NativeMenuItem
+      {
+        Header = "Reload app",
         Command = new RelayCommand(() =>
         {
           Dispatcher.UIThread.Post(() =>
@@ -61,10 +77,9 @@ public class TrayService : ITrayService
           });
         }),
       },
-      new NativeMenuItemSeparator(),
       new NativeMenuItem
       {
-        Header = "Exit",
+        Header = "Exit app",
         Command = new RelayCommand(() =>
         {
           if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)

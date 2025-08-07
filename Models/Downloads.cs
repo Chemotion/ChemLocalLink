@@ -1,10 +1,5 @@
 /// <summary>
 /// Represents a downloaded file with tracking and metadata
-///
-/// Includes file name, path, size, timestamp, and checksum
-/// Tracks edit status, keep status, and token expiration
-/// Implements observable properties for real-time UI updates
-/// Persisted in downloads.json for session restoration
 /// </summary>
 
 using System;

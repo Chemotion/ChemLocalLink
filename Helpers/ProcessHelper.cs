@@ -1,11 +1,5 @@
 ﻿/// <summary>
 /// Coordinates chemotion:// URL processing and file download workflow
-///
-/// Validates and parses URLs, extracts tokens, and handles downloads
-/// Integrates with DownloadService and FileService
-/// Manages errors and user notifications at each step
-/// Prevents concurrent processing of multiple URLs
-/// Ties together all services for end-to-end file handling
 /// </summary>
 
 using System;

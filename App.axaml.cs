@@ -1,6 +1,5 @@
 ﻿/// <summary>
 /// Main application class for ChemLocalLink
-///
 /// Manages app lifecycle and startup logic
 /// Sets up dependency injection and services
 /// Ensures only one instance runs at a time
@@ -34,7 +33,7 @@ public class App : Application
   {
     if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
     {
-      // Configure DI with the notification manager
+      // configure DI with the notification manager
       var services = new ServiceCollection();
       services.AddApplicationServices(Program.NotificationManager);
       _serviceProvider = services.BuildServiceProvider();

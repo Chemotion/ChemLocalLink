@@ -1,10 +1,5 @@
 /// <summary>
 /// Manages system notifications across platforms
-///
-/// Displays status and error messages via desktop notifications
-/// Supports Windows, Linux, and macOS (fallback to debug output if needed)
-/// Provides predefined messages for consistent user feedback
-/// Integrates with system tray for background notifications
 /// </summary>
 
 using System;

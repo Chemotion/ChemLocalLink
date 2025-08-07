@@ -1,11 +1,5 @@
 ﻿/// <summary>
-/// Downloads files from Chemotion servers with progress and error handling
-///
-/// Authenticates using bearer tokens and tracks download progress
-/// Resolves filename conflicts by auto-renaming duplicates
-/// Saves files in %temp%/chemotion/ directory
-/// Extracts original names from response headers
-/// Reports issues like network or file errors to the user
+/// Downloads files from Chemotion using bearer authentication, with progress tracking and filename extraction
 /// </summary>
 
 using System;
@@ -46,16 +40,23 @@ internal class DownloadService : IDownloadService
   {
     try
     {
-      var token = authToken.Length < 1 ? mainWindowView.Url![(mainWindowView.Url!.LastIndexOf('/') + 1)..] : authToken;
+      var token = authToken?.Length < 1 ? mainWindowView?.Url?[(mainWindowView.Url.LastIndexOf('/') + 1)..] : authToken;
+
+      if (token == null || mainWindowView == null)
+      {
+        return null;
+      }
+
       mainWindowView.AuthToken = token;
-      var url = new Uri(mainWindowView.Url!);
-      _apiHelper.ApiHost = $"{url.Scheme}://{url.Host}";
+      if (mainWindowView.Url != null)
+        _apiHelper.SetFromUrl(mainWindowView.Url);
       var downloadUrl = _apiHelper.DownloadUrl(token);
       mainWindowView.Status = NotificationService.Messages.Downloading;
       var progress = new Progress<ProgressInfo>(progressInfo =>
       {
-        mainWindowView.Status =
-          $"Downloaded {progressInfo.BytesRead.FormatBytes()} out of {progressInfo.TotalBytesExpected?.FormatBytes() ?? "0"}.";
+        if (mainWindowView != null)
+          mainWindowView.Status =
+            $"Downloaded {progressInfo.BytesRead.FormatBytes()} out of {progressInfo.TotalBytesExpected?.FormatBytes() ?? "0"}.";
       });
 
       var (response, fileContentBytes) = await _httpClient.GetWithProgressAsync(downloadUrl, progress);
@@ -66,8 +67,11 @@ internal class DownloadService : IDownloadService
 
       if (!response.IsSuccessStatusCode || contentDisposition == null || !contentDisposition.Contains("filename"))
       {
-        mainWindowView.Status = NotificationService.Messages.DownloadFail;
-        await _notificationService.ShowNotificationAsync(mainWindowView.Status);
+        if (mainWindowView != null)
+          mainWindowView.Status = NotificationService.Messages.DownloadFail;
+        await _notificationService.ShowNotificationAsync(
+          mainWindowView?.Status ?? NotificationService.Messages.DownloadFail
+        );
 
         return null;
       }
@@ -96,15 +100,17 @@ internal class DownloadService : IDownloadService
         4096,
         true
       );
-      await fileStream.WriteAsync(fileContentBytes.AsMemory(0, fileContentBytes.Length));
+      if (fileContentBytes != null)
+        await fileStream.WriteAsync(fileContentBytes.AsMemory(0, fileContentBytes.Length));
       return (filePath, originalName);
     }
     catch (Exception ex)
     {
       var errorMessage =
         ex is IOException ? NotificationService.Messages.FileAccessError : NotificationService.Messages.UnExpectedError;
-      mainWindowView.Status = errorMessage;
-      await _notificationService.ShowNotificationAsync(mainWindowView.Status);
+      if (mainWindowView != null)
+        mainWindowView.Status = errorMessage;
+      await _notificationService.ShowNotificationAsync(mainWindowView?.Status ?? errorMessage);
       return null;
     }
   }

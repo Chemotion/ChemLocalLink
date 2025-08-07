@@ -1,11 +1,5 @@
 /// <summary>
 /// Uploads edited files to Chemotion servers with progress and file validation
-///
-/// Supports "delete" and "keep" upload modes
-/// Validates edits via checksum before uploading
-/// Handles single and batch uploads with progress reporting
-/// Updates local file state and downloads.json after upload
-/// Notifies users of success or failure
 /// </summary>
 
 using System;

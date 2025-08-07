@@ -7,7 +7,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Web;
 
-namespace ChemLocalLink.Extensions;
+namespace ChemLocalLink.Utilities;
 
 public static class StringExtension
 {

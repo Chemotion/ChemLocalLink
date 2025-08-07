@@ -3,7 +3,7 @@
              x:Class="ChemLocalLink.App"
              xmlns:local="using:ChemLocalLink"
              xmlns:behaviors="clr-namespace:ChemLocalLink.Behaviors"
-             xmlns:extensions="clr-namespace:ChemLocalLink.Extensions"
+             xmlns:extensions="clr-namespace:ChemLocalLink.Utilities"
              RequestedThemeVariant="Dark">
   <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 

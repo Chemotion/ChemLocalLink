@@ -10,7 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using ChemLocalLink.Extensions;
+using ChemLocalLink.Utilities;
 using ChemLocalLink.Models;
 using ChemLocalLink.ViewModels;
 using MsBox.Avalonia;

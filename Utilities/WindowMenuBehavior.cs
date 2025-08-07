@@ -8,7 +8,7 @@ using Avalonia.Xaml.Interactivity;
 using ChemLocalLink.ViewModels;
 using CommunityToolkit.Mvvm.Input;
 
-namespace ChemLocalLink.Extensions;
+namespace ChemLocalLink.Utilities;
 
 public class WindowMenuBehavior : Behavior<MenuItem>
 {

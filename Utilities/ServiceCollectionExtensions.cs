@@ -10,7 +10,7 @@ using DesktopNotifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace ChemLocalLink.Extensions;
+namespace ChemLocalLink.Utilities;
 
 public static class ServiceCollectionExtensions
 {

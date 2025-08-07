@@ -6,7 +6,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
-using ChemLocalLink.Extensions;
+using ChemLocalLink.Utilities;
 using ChemLocalLink.ViewModels;
 
 namespace ChemLocalLink.Services;

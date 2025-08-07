@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ChemLocalLink.Models;
 
-namespace ChemLocalLink.Extensions;
+namespace ChemLocalLink.Utilities;
 
 public static class HttpClientExtension
 {

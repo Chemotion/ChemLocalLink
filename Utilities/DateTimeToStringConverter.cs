@@ -7,7 +7,7 @@ using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 
-namespace ChemLocalLink.Extensions;
+namespace ChemLocalLink.Utilities;
 
 public class DateTimeToStringConverter : IValueConverter
 {

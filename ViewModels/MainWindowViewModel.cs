@@ -14,7 +14,7 @@ using Avalonia;
 using Avalonia.Input;
 using Avalonia.Styling;
 using Avalonia.Threading;
-using ChemLocalLink.Extensions;
+using ChemLocalLink.Utilities;
 using ChemLocalLink.Models;
 using ChemLocalLink.Services;
 using ChemLocalLink.Views;

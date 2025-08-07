@@ -17,7 +17,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform;
 using Avalonia.Threading;
-using ChemLocalLink.Extensions;
+using ChemLocalLink.Utilities;
 using ChemLocalLink.Models;
 using ChemLocalLink.ViewModels;
 using ChemLocalLink.Views;

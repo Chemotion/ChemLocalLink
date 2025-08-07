@@ -9,7 +9,7 @@ using DesktopNotifications;
 using DesktopNotifications.FreeDesktop;
 using DesktopNotifications.Windows;
 
-namespace ChemLocalLink.Extensions;
+namespace ChemLocalLink.Utilities;
 
 public static class AppBuilderExtensions
 {

@@ -10,7 +10,7 @@
 using System;
 using System.Diagnostics;
 using Avalonia;
-using ChemLocalLink.Extensions;
+using ChemLocalLink.Utilities;
 using DesktopNotifications;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.FontAwesome;

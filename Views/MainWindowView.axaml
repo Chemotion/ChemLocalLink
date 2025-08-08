@@ -25,7 +25,7 @@
                     Padding="16,8">
                 <Grid ColumnDefinitions="Auto,Auto,*,Auto">
                     <Image Grid.Column="0"
-                           Source="/Assets/icon.ico"
+                           Source="/Assets/icon.png"
                            Height="40"
                            VerticalAlignment="Center"
                            Margin="8,0,8,0" />

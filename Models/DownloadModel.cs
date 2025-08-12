@@ -15,6 +15,7 @@ public partial class DownloadModel : ObservableObject
   public string OriginalFileName { get; set; } = string.Empty;
   public string FilePath { get; set; } = string.Empty;
   public DateTime FileDownloadTimeStamp { get; set; }
+  public string Origin { get; set; } = string.Empty;
 
   [ObservableProperty]
   private string? _fileSize;

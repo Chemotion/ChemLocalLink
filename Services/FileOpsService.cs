@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using ChemLocalLink.Models;
 using ChemLocalLink.Utilities;
 using ChemLocalLink.ViewModels;
@@ -162,6 +163,9 @@ internal class FileOpsService : IFileOpsService
             ? mainWindowView.DownloadedFiles.Max(f => f.FileId) + 1
             : random.NextInt64(10000, 999999);
 
+        // extract origin from URL
+        var originHost = mainWindowView.Url.ExtractOriginHost() ?? string.Empty;
+
         var download = new DownloadModel()
         {
           FileId = id,
@@ -173,6 +177,7 @@ internal class FileOpsService : IFileOpsService
           FileDownloadTimeStamp = File.GetLastWriteTime(filePath),
           IsEdited = false,
           Exp = _apiService.TokenExp(mainWindowView.Url!),
+          Origin = originHost,
         };
 
         File.SetCreationTime(filePath, DateTime.Now);
@@ -195,16 +200,17 @@ internal class FileOpsService : IFileOpsService
           FileDownloadTimeStamp = File.GetLastWriteTime(filePath),
           IsEdited = false,
           Exp = _apiService.TokenExp(mainWindowView.Url!),
+          Origin = originHost,
         };
 
         _jsonDataService.AppendJsonToFile(jsonFilePath, jsonObject);
 
-        mainWindowView.DownloadedFiles?.Insert(0, download);
-      }
-
-      if (mainWindowView != null)
-      {
-        mainWindowView.HasFilesDownloaded = (mainWindowView.DownloadedFiles?.Count ?? 0) > 0;
+        Dispatcher.UIThread.Post(() =>
+        {
+          mainWindowView.DownloadedFiles?.Insert(0, download);
+          mainWindowView.HasFilesDownloaded = (mainWindowView.DownloadedFiles?.Count ?? 0) > 0;
+          mainWindowView.RebuildGroups();
+        });
       }
     }
     catch (Exception ex)
@@ -379,6 +385,7 @@ internal class FileOpsService : IFileOpsService
     File.Delete(file.FilePath);
     mainWindowViewModel.DownloadedFiles.RemoveAt(mainWindowViewModel.SelectedDownloadedFileIndex);
     _jsonDataService.WriteDataToAppData(mainWindowViewModel);
+    mainWindowViewModel.RebuildGroups();
     return true;
   }
 

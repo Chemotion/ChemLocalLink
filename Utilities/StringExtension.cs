@@ -62,4 +62,29 @@ public static class StringExtension
     }
     return decodedUrl[(lastSlashIndex + 1)..];
   }
+
+  public static string? ExtractOriginHost(this string? url)
+  {
+    if (string.IsNullOrWhiteSpace(url))
+      return null;
+
+    try
+    {
+      if (url.StartsWith("chemotion://", StringComparison.OrdinalIgnoreCase))
+      {
+        var parsed = url.ParseUrl();
+        if (!string.IsNullOrWhiteSpace(parsed))
+        {
+          url = parsed;
+        }
+      }
+
+      var uri = new Uri(url);
+      return uri.Host;
+    }
+    catch
+    {
+      return null;
+    }
+  }
 }

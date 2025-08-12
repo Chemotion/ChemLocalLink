@@ -6,6 +6,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -53,10 +54,39 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
   ObservableCollection<DownloadModel> _downloadedFiles = [];
 
   [ObservableProperty]
+  private ObservableCollection<OriginGroupModel> _downloadedByOrigin = [];
+
+  [ObservableProperty]
+  private DownloadModel? _selectedDownloadedFile;
+
+  partial void OnSelectedDownloadedFileChanged(DownloadModel? value)
+  {
+    if (value == null)
+    {
+      SelectedDownloadedFileIndex = -1;
+      return;
+    }
+
+    var idx = DownloadedFiles.IndexOf(value);
+    SelectedDownloadedFileIndex = idx;
+  }
+
+  [ObservableProperty]
   private ObservableCollection<float> _editedFileIds = [];
 
   [ObservableProperty]
   int _selectedDownloadedFileIndex = -1;
+
+  partial void OnSelectedDownloadedFileIndexChanged(int value)
+  {
+    if (value >= 0 && value < DownloadedFiles.Count)
+    {
+      if (!ReferenceEquals(SelectedDownloadedFile, DownloadedFiles[value]))
+      {
+        SelectedDownloadedFile = DownloadedFiles[value];
+      }
+    }
+  }
 
   [ObservableProperty]
   bool _hasFilesDownloaded;
@@ -136,6 +166,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     _windowService.MainWindowViewModel = this;
 
     SetupEventHandlers();
+
+    DownloadedFiles.CollectionChanged += (s, e) => RebuildGroups();
   }
 
   private void SetupEventHandlers()
@@ -231,9 +263,14 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
   {
     if (DownloadedFiles.Count <= 0)
       return;
-    if (SelectedDownloadedFileIndex <= -1)
+
+    var fileModel =
+      SelectedDownloadedFileIndex > -1 ? DownloadedFiles[SelectedDownloadedFileIndex] : SelectedDownloadedFile;
+
+    if (fileModel == null)
       return;
-    var filePath = DownloadedFiles[SelectedDownloadedFileIndex].FilePath;
+
+    var filePath = fileModel.FilePath;
     using var process = new Process();
     process.StartInfo = new ProcessStartInfo(filePath) { UseShellExecute = true };
     process.Start();
@@ -249,13 +286,25 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
   [RelayCommand]
   public void DeleteSelectedFile()
   {
-    if (SelectedDownloadedFileIndex < 0 || SelectedDownloadedFileIndex >= DownloadedFiles.Count)
+    DownloadModel? selectedFile = null;
+
+    if (SelectedDownloadedFileIndex >= 0 && SelectedDownloadedFileIndex < DownloadedFiles.Count)
+    {
+      selectedFile = DownloadedFiles[SelectedDownloadedFileIndex];
+    }
+    else if (SelectedDownloadedFile != null)
+    {
+      selectedFile = SelectedDownloadedFile;
+    }
+
+    if (selectedFile == null)
       return;
 
-    var selectedFile = DownloadedFiles[SelectedDownloadedFileIndex];
     if (File.Exists(selectedFile.FilePath))
       File.Delete(selectedFile.FilePath);
-    DownloadedFiles.RemoveAt(SelectedDownloadedFileIndex);
+
+    DownloadedFiles.Remove(selectedFile);
+
     var appDataPath = Path.Combine(
       Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
       "ChemLocalLink"
@@ -268,6 +317,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
       File.WriteAllText(jsonFilePath, data);
     }
     HasFilesDownloaded = DownloadedFiles.Count > 0;
+
+    RebuildGroups();
   }
 
   partial void OnStatusChanged(string? oldValue, string? newValue)
@@ -285,5 +336,55 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     fileMonitorTimer?.Dispose();
     idleTimer?.Stop();
     _fileProcess?.Dispose();
+  }
+
+  partial void OnDownloadedFilesChanged(ObservableCollection<DownloadModel> value)
+  {
+    RebuildGroups();
+  }
+
+  private int _rebuildVersion = 0;
+
+  public async void RebuildGroups()
+  {
+    try
+    {
+      var currentVersion = ++_rebuildVersion;
+
+      // small debounce for rapid updates
+      await Task.Delay(10);
+      if (currentVersion != _rebuildVersion)
+        return;
+
+      await Dispatcher.UIThread.InvokeAsync(() =>
+      {
+        var groups = DownloadedFiles
+          .GroupBy(d => (d.Origin ?? string.Empty).Trim().ToLowerInvariant())
+          .Select(g => new OriginGroupModel
+          {
+            Origin = string.IsNullOrWhiteSpace(g.Key)
+              ? "Unknown"
+              : g.Select(x => x.Origin).FirstOrDefault(o => !string.IsNullOrWhiteSpace(o)) ?? g.Key,
+            Files = new ObservableCollection<DownloadModel>(g.OrderByDescending(f => f.FileDownloadTimeStamp))
+          })
+          .OrderBy(g => g.Origin)
+          .ToList();
+
+        DownloadedByOrigin.Clear();
+        foreach (var g in groups)
+        {
+          DownloadedByOrigin.Add(g);
+        }
+      });
+    }
+    catch (Exception ex)
+    {
+      Debug.WriteLine(ex.Message);
+    }
+  }
+
+  partial void OnHasFilesDownloadedChanged(bool value)
+  {
+    RebuildGroups();
   }
 }

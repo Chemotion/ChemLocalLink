@@ -97,6 +97,17 @@ public class WindowService : IWindowService
                 {
                   if (download.IsKept && download.IsEdited)
                     download.IsEdited = false;
+
+                  if (string.IsNullOrWhiteSpace(download.Origin) && !string.IsNullOrWhiteSpace(mainWindowView.Url))
+                  {
+                    try
+                    {
+                      var uri = new Uri(mainWindowView.Url);
+                      download.Origin = uri.Host;
+                    }
+                    catch { }
+                  }
+
                   mainWindowView.DownloadedFiles.Insert(0, download);
                 }
               }
@@ -104,6 +115,8 @@ public class WindowService : IWindowService
               var newData = JsonConvert.SerializeObject(mainWindowView.DownloadedFiles.Reverse());
               File.WriteAllText(filePath, newData);
               mainWindowView.HasFilesDownloaded = mainWindowView.DownloadedFiles.Count > 0;
+
+              mainWindowView.RebuildGroups();
             }
             else
             {

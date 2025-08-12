@@ -8,7 +8,8 @@
     <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
     <Application.Styles>
         <Style Selector="TextBlock">
-            <Setter Property="FontFamily" Value="Segoe UI, San Francisco, Ubuntu, Arial, sans-serif" />
+            <Setter Property="FontFamily"
+                    Value="Segoe UI, San Francisco, Ubuntu, Arial, sans-serif" />
         </Style>
         <Style Selector="Button:disabled">
             <Setter Property="Template">

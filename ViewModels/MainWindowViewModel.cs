@@ -43,6 +43,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
   internal readonly IWindowService _windowService;
   internal readonly IWorkflowService _workflowService;
   internal readonly IJsonDataService _jsonDataService;
+  internal readonly IPathService _pathService;
+  internal readonly ISessionService _sessionService;
   internal Process? _fileProcess;
 
   [ObservableProperty]
@@ -140,7 +142,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     IWindowService windowService,
     INotificationService notificationService,
     IWorkflowService workflowService,
-    IJsonDataService jsonDataService
+    IJsonDataService jsonDataService,
+    IPathService pathService,
+    ISessionService sessionService
   )
   {
     _httpClient = httpClient;
@@ -151,6 +155,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     _notificationService = notificationService;
     _workflowService = workflowService;
     _jsonDataService = jsonDataService;
+    _pathService = pathService;
+    _sessionService = sessionService;
 
     IsDarkMode = _jsonDataService.LoadCurrentTheme();
     Process = new RelayCommand<Task>(_ => Task.Run(async () => await ProcessCommand()));
@@ -182,7 +188,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
   private void MainWindow_Loaded(object? sender, EventArgs e)
   {
     _windowService.Load(this);
-    fileMonitorTimer = new Timer.Timer(5000); // Check for file changes every 5 seconds instead of 1ms
+    fileMonitorTimer = new Timer.Timer(5000);
     fileMonitorTimer.Elapsed += OnTimedEvent;
     fileMonitorTimer.Enabled = true;
   }
@@ -197,7 +203,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
       foreach (var file in downloadedFiles)
       {
-        // Check if file still exists before calculating checksum
+        // check if file still exists before calculating checksum
         if (!File.Exists(file.FilePath))
         {
           file.IsEdited = false;
@@ -239,7 +245,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
   [RelayCommand]
   public void OpenDownloadDirectory()
   {
-    var folderPath = Path.Combine(Path.GetTempPath(), "chemotion");
+    var folderPath = _pathService.GetDownloadDirectory();
 
     if (Directory.Exists(folderPath))
     {
@@ -253,6 +259,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
       {
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo("xdg-open", folderPath) { UseShellExecute = true, };
+        process.Start();
+      }
+      else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+      {
+        using var process = new Process();
+        process.StartInfo = new ProcessStartInfo("open", folderPath) { UseShellExecute = true, };
         process.Start();
       }
     }
@@ -300,8 +312,15 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     if (selectedFile == null)
       return;
 
-    if (File.Exists(selectedFile.FilePath))
-      File.Delete(selectedFile.FilePath);
+    try
+    {
+      if (File.Exists(selectedFile.FilePath))
+        File.Delete(selectedFile.FilePath);
+      var backup = selectedFile.FilePath + "~";
+      if (File.Exists(backup))
+        File.Delete(backup);
+    }
+    catch { }
 
     DownloadedFiles.Remove(selectedFile);
 
@@ -319,6 +338,18 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     HasFilesDownloaded = DownloadedFiles.Count > 0;
 
     RebuildGroups();
+  }
+
+  [RelayCommand]
+  public async Task<bool> ExportSession(string targetPath)
+  {
+    return await _sessionService.ExportSessionAsync(this, targetPath);
+  }
+
+  [RelayCommand]
+  public async Task<bool> ImportSession(string sourcePath)
+  {
+    return await _sessionService.ImportSessionAsync(this, sourcePath);
   }
 
   partial void OnStatusChanged(string? oldValue, string? newValue)
@@ -386,5 +417,53 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
   partial void OnHasFilesDownloadedChanged(bool value)
   {
     RebuildGroups();
+  }
+
+  [RelayCommand]
+  public async Task ClearAllDownloads()
+  {
+    try
+    {
+      foreach (var d in DownloadedFiles.ToList())
+      {
+        try
+        {
+          if (File.Exists(d.FilePath))
+            File.Delete(d.FilePath);
+
+          var backup = d.FilePath + "~";
+          if (File.Exists(backup))
+            File.Delete(backup);
+        }
+        catch { }
+      }
+      DownloadedFiles.Clear();
+      HasFilesDownloaded = false;
+      await _jsonDataService.WriteDataToAppData(this);
+
+      // purge any stray backup files
+      try
+      {
+        var dir = _pathService.GetDownloadDirectory();
+        if (Directory.Exists(dir))
+        {
+          foreach (var orphan in Directory.EnumerateFiles(dir, "*~", SearchOption.TopDirectoryOnly))
+          {
+            try
+            {
+              File.Delete(orphan);
+            }
+            catch { }
+          }
+        }
+      }
+      catch { }
+
+      Status = "All downloads cleared";
+    }
+    catch
+    {
+      Status = "Clear failed";
+    }
   }
 }

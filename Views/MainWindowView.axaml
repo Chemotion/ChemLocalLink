@@ -68,6 +68,32 @@
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center" />
                         </Button>
+                        <Button Height="32"
+                                Width="32"
+                                Padding="0"
+                                CornerRadius="16"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                ToolTip.Tip="Export session (.chemlocallink)"
+                                Click="ExportSession_Click">
+                            <i:Icon Value="fa-solid fa-file-export"
+                                    FontSize="14"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+                        </Button>
+                        <Button Height="32"
+                                Width="32"
+                                Padding="0"
+                                CornerRadius="16"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                ToolTip.Tip="Import session (.chemlocallink)"
+                                Click="ImportSession_Click">
+                            <i:Icon Value="fa-solid fa-file-import"
+                                    FontSize="14"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Border>

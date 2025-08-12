@@ -31,18 +31,21 @@ internal class FileOpsService : IFileOpsService
   private readonly IApiService _apiService;
   private readonly INotificationService _notificationService;
   private readonly IJsonDataService _jsonDataService;
+  private readonly IPathService _pathService;
 
   public FileOpsService(
     HttpClient httpClient,
     IApiService apiService,
     INotificationService notificationService,
-    IJsonDataService jsonDataService
+    IJsonDataService jsonDataService,
+    IPathService pathService
   )
   {
     _httpClient = httpClient;
     _apiService = apiService;
     _notificationService = notificationService;
     _jsonDataService = jsonDataService;
+    _pathService = pathService;
   }
 
   #region Download Operations
@@ -91,10 +94,10 @@ internal class FileOpsService : IFileOpsService
       }
 
       var fileName = contentDisposition[(contentDisposition.IndexOf("=", StringComparison.Ordinal) + 1)..];
-      var fileDir = Path.Combine(Path.GetTempPath(), "chemotion");
+      var fileDir = _pathService.GetDownloadDirectory();
       Directory.CreateDirectory(fileDir);
 
-      var filePath = Path.Combine(fileDir, fileName);
+      var filePath = Path.Combine(fileDir, fileName).NormalizePath();
       var originalName = Path.GetFileName(filePath);
       var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
       var fileExtension = Path.GetExtension(fileName);
@@ -102,7 +105,7 @@ internal class FileOpsService : IFileOpsService
 
       while (File.Exists(filePath))
       {
-        filePath = Path.Combine(fileDir, $"{fileNameWithoutExtension}-{counter}{fileExtension}");
+        filePath = Path.Combine(fileDir, $"{fileNameWithoutExtension}-{counter}{fileExtension}").NormalizePath();
         counter++;
       }
 
@@ -165,6 +168,8 @@ internal class FileOpsService : IFileOpsService
 
         // extract origin from URL
         var originHost = mainWindowView.Url.ExtractOriginHost() ?? string.Empty;
+        var token = mainWindowView.AuthToken; // store per-file token
+        var exp = _apiService.TokenExp(mainWindowView.Url!);
 
         var download = new DownloadModel()
         {
@@ -176,8 +181,10 @@ internal class FileOpsService : IFileOpsService
           FileSize = new FileInfo(filePath).Length.FormatBytes(),
           FileDownloadTimeStamp = File.GetLastWriteTime(filePath),
           IsEdited = false,
-          Exp = _apiService.TokenExp(mainWindowView.Url!),
+          Exp = exp,
           Origin = originHost,
+          Token = token,
+          SourceUrl = mainWindowView.Url
         };
 
         File.SetCreationTime(filePath, DateTime.Now);
@@ -199,8 +206,10 @@ internal class FileOpsService : IFileOpsService
           FileSize = new FileInfo(filePath).Length.FormatBytes(),
           FileDownloadTimeStamp = File.GetLastWriteTime(filePath),
           IsEdited = false,
-          Exp = _apiService.TokenExp(mainWindowView.Url!),
+          Exp = exp,
           Origin = originHost,
+          Token = token,
+          SourceUrl = mainWindowView.Url
         };
 
         _jsonDataService.AppendJsonToFile(jsonFilePath, jsonObject);
@@ -362,12 +371,12 @@ internal class FileOpsService : IFileOpsService
 
   private async Task<bool> AttemptUpload(string filePath, MainWindowViewModel mainView, string ogIsm, string role)
   {
-    var upload = await Upload(filePath, mainView, ogIsm);
-    if (!upload)
-      return false;
-
     var file = mainView.DownloadedFiles.FirstOrDefault(f => f.FilePath == filePath);
     if (file == null)
+      return false;
+
+    var upload = await Upload(file, mainView, ogIsm);
+    if (!upload)
       return false;
 
     if (role == "delete")
@@ -399,39 +408,74 @@ internal class FileOpsService : IFileOpsService
 
   public async Task<bool> Upload(string filePath, MainWindowViewModel mainView, string ogIsm = "")
   {
+    // legacy path kept for backward compatibility
+    var model = mainView.DownloadedFiles.FirstOrDefault(f => f.FilePath == filePath);
+    if (model == null)
+      return false;
+    return await Upload(model, mainView, ogIsm);
+  }
+
+  private async Task<bool> Upload(DownloadModel fileModel, MainWindowViewModel mainView, string ogIsm = "")
+  {
     try
     {
-      if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+      var token = fileModel.Token ?? mainView.AuthToken;
+      if (string.IsNullOrWhiteSpace(token))
+      {
+        mainView.Status = NotificationService.Messages.UploadFail;
+        await _notificationService.ShowNotificationAsync(mainView.Status);
+        return false;
+      }
+
+      // expiration check
+      var expUtc = DateTimeOffset.FromUnixTimeSeconds(fileModel.Exp).UtcDateTime;
+      if (DateTime.UtcNow > expUtc)
+      {
+        mainView.Status = NotificationService.Messages.UploadFail; // expired
+        await _notificationService.ShowNotificationAsync(mainView.Status);
+        return false;
+      }
+
+      var normalizedPath = fileModel.FilePath.NormalizePath();
+      if (string.IsNullOrEmpty(normalizedPath) || !File.Exists(normalizedPath))
       {
         mainView.Status = NotificationService.Messages.FileAccessError;
         await _notificationService.ShowNotificationAsync(mainView.Status);
         return false;
       }
 
-      byte[] fileContentBytes = await File.ReadAllBytesAsync(filePath);
+      byte[] fileContentBytes = await File.ReadAllBytesAsync(normalizedPath);
       var content = new MultipartFormDataContent
       {
-        { new ByteArrayContent(fileContentBytes), "file", Path.GetFileName(filePath) },
+        { new ByteArrayContent(fileContentBytes), "file", Path.GetFileName(normalizedPath) },
       };
 
-      var fileName = !string.IsNullOrEmpty(ogIsm) ? ogIsm : new FileInfo(filePath).Name;
+      var fileName = !string.IsNullOrEmpty(ogIsm)
+        ? ogIsm
+        : fileModel.OriginalFileName ?? new FileInfo(normalizedPath).Name;
       content.Add(new StringContent(fileName), "attachmentName");
 
-      var fileSize = new FileInfo(filePath).Length.FormatBytes();
+      var fileSize = new FileInfo(normalizedPath).Length.FormatBytes();
       var progress = new Progress<ProgressModel>(prog =>
       {
-        var currentProgress = prog.BytesRead > new FileInfo(filePath).Length ? fileSize : prog.BytesRead.FormatBytes();
+        var currentProgress =
+          prog.BytesRead > new FileInfo(normalizedPath).Length ? fileSize : prog.BytesRead.FormatBytes();
         mainView.FileUpDownProgressText = $"Uploaded {currentProgress} out of {fileSize}.";
         mainView.Status = mainView.FileUpDownProgressText;
         mainView.FileUpDownProgress = prog.Percentage;
-        if (prog.BytesRead >= new FileInfo(filePath).Length)
+        if (prog.BytesRead >= new FileInfo(normalizedPath).Length)
         {
           mainView.Status = NotificationService.Messages.UploadSuccessful;
         }
       });
 
+      if (!string.IsNullOrWhiteSpace(fileModel.SourceUrl))
+      {
+        _apiService.SetFromUrl(fileModel.SourceUrl);
+      }
+
       var response = await _httpClient.PostWithProgressAsync(
-        _apiService.UploadUrl(mainView.AuthToken),
+        _apiService.UploadUrl(token),
         content,
         progress,
         isUpload: true

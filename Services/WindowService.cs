@@ -33,6 +33,7 @@ public class WindowService : IWindowService
   private readonly ITrayService _trayService;
   private readonly INotificationService _notificationService;
   private readonly IWorkflowService _workflowService;
+  private readonly IPathService _pathService;
 
   public MainWindowViewModel? MainWindowViewModel { get; set; }
   public MainWindowView? MainWindow { get; set; }
@@ -40,12 +41,14 @@ public class WindowService : IWindowService
   public WindowService(
     ITrayService trayService,
     INotificationService notificationService,
-    IWorkflowService workflowService
+    IWorkflowService workflowService,
+    IPathService pathService
   )
   {
     _trayService = trayService;
     _notificationService = notificationService;
     _workflowService = workflowService;
+    _pathService = pathService;
   }
 
   public void Deactivate(MainWindowViewModel mainWindowView)
@@ -81,47 +84,51 @@ public class WindowService : IWindowService
         if (File.Exists(filePath) && !string.IsNullOrEmpty(File.ReadAllText(filePath)))
         {
           var data = File.ReadAllText(filePath);
-          var downloads = JsonConvert.DeserializeObject<ObservableCollection<DownloadModel>>(data);
+          var downloads = JsonConvert.DeserializeObject<ObservableCollection<DownloadModel>>(data) ?? new();
 
-          if (downloads == null || downloads.Count == 0)
+          // migrate legacy temp directory files if needed
+          _pathService.MigrateFromLegacyTempDir(downloads.ToList());
+          // persist any FilePath changes
+          var migratedData = JsonConvert.SerializeObject(downloads, Formatting.Indented);
+          File.WriteAllText(filePath, migratedData);
+
+          if (downloads.Count == 0)
           {
             mainWindowView.HasFilesDownloaded = false;
           }
           else
           {
-            if (downloads.Count > 0)
+            foreach (var download in downloads)
             {
-              foreach (var download in downloads)
+              if (File.Exists(download.FilePath))
               {
-                if (File.Exists(download.FilePath))
+                if (download.IsKept && download.IsEdited)
+                  download.IsEdited = false;
+
+                if (string.IsNullOrWhiteSpace(download.Origin) && !string.IsNullOrWhiteSpace(mainWindowView.Url))
                 {
-                  if (download.IsKept && download.IsEdited)
-                    download.IsEdited = false;
-
-                  if (string.IsNullOrWhiteSpace(download.Origin) && !string.IsNullOrWhiteSpace(mainWindowView.Url))
+                  try
                   {
-                    try
-                    {
-                      var uri = new Uri(mainWindowView.Url);
-                      download.Origin = uri.Host;
-                    }
-                    catch { }
+                    var uri = new Uri(mainWindowView.Url);
+                    download.Origin = uri.Host;
                   }
-
-                  mainWindowView.DownloadedFiles.Insert(0, download);
+                  catch { }
                 }
+
+                // ensure new fields exist for legacy entries
+                if (download.SourceUrl == null && !string.IsNullOrWhiteSpace(mainWindowView.Url))
+                  download.SourceUrl = mainWindowView.Url;
+                // token left null for legacy entries
+
+                mainWindowView.DownloadedFiles.Insert(0, download);
               }
-
-              var newData = JsonConvert.SerializeObject(mainWindowView.DownloadedFiles.Reverse());
-              File.WriteAllText(filePath, newData);
-              mainWindowView.HasFilesDownloaded = mainWindowView.DownloadedFiles.Count > 0;
-
-              mainWindowView.RebuildGroups();
             }
-            else
-            {
-              mainWindowView.HasFilesDownloaded = false;
-            }
+
+            var newData = JsonConvert.SerializeObject(mainWindowView.DownloadedFiles.Reverse());
+            File.WriteAllText(filePath, newData);
+            mainWindowView.HasFilesDownloaded = mainWindowView.DownloadedFiles.Count > 0;
+
+            mainWindowView.RebuildGroups();
           }
         }
         else

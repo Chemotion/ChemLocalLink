@@ -51,15 +51,21 @@ internal class JsonDataService : IJsonDataService
       json = JsonConvert.SerializeObject(newEntries, Formatting.Indented);
     }
 
-    File.WriteAllText(path, json);
+    var tmp = path + ".tmp";
+    File.WriteAllText(tmp, json);
+    File.Move(tmp, path, true);
   }
 
   public async Task WriteDataToAppData(MainWindowViewModel mainWindowViewModel)
   {
     Directory.CreateDirectory(_appDataPath);
     var jsonFilePath = Path.Combine(_appDataPath, "downloads.json");
-    var data = JsonConvert.SerializeObject(mainWindowViewModel.DownloadedFiles);
-    await File.WriteAllTextAsync(jsonFilePath, data);
+    var data = JsonConvert.SerializeObject(mainWindowViewModel.DownloadedFiles, Formatting.Indented);
+    var tmp = jsonFilePath + ".tmp";
+    await File.WriteAllTextAsync(tmp, data);
+    if (File.Exists(jsonFilePath))
+      File.Delete(jsonFilePath);
+    File.Move(tmp, jsonFilePath);
   }
 
   public void SaveCurrentTheme(bool isDarkMode)

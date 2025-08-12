@@ -39,6 +39,8 @@ public static class ServiceCollectionExtensions
     services.AddSingleton<IWorkflowService, WorkflowService>();
     services.AddSingleton<ITrayService, TrayService>();
     services.AddSingleton<IWindowService, WindowService>();
+    services.AddSingleton<IPathService, PathService>();
+    services.AddSingleton<ISessionService, SessionService>();
 
     // ViewModels
     services.AddTransient<MainWindowViewModel>();

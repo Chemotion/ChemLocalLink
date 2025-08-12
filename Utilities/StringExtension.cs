@@ -87,4 +87,23 @@ public static class StringExtension
       return null;
     }
   }
+
+  // normalize path separators and resolve to canonical form
+  public static string NormalizePath(this string path)
+  {
+    if (string.IsNullOrWhiteSpace(path))
+      return path;
+    var sep = Path.DirectorySeparatorChar;
+    var otherSep = sep == '/' ? '\\' : '/';
+    var replaced = path.Replace(otherSep, sep);
+    try
+    {
+      // only call GetFullPath if input is rooted
+      return Path.IsPathRooted(replaced) ? Path.GetFullPath(replaced) : replaced;
+    }
+    catch
+    {
+      return replaced;
+    }
+  }
 }

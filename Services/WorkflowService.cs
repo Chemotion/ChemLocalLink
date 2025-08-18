@@ -41,22 +41,6 @@ internal class WorkflowService : IWorkflowService
           return;
         }
 
-        if (mainWindowView.Url.ToLower().Contains("url="))
-        {
-          var uri = new Uri(mainWindowView.Url);
-          string? parm = HttpUtility.ParseQueryString(uri.Query).Get("url");
-          if (!string.IsNullOrEmpty(parm))
-          {
-            mainWindowView.Url = parm;
-            _url = parm;
-            if (mainWindowView.Url != _url)
-            {
-              mainWindowView.SelectedUrl = _url;
-              mainWindowView.Url = _url;
-            }
-          }
-        }
-
         if (!string.IsNullOrEmpty(_url) && mainWindowView.Url != _url)
           mainWindowView.Url = _url;
         var token = _url.ExtractAuthToken();
@@ -70,6 +54,9 @@ internal class WorkflowService : IWorkflowService
         }
 
         await _fileOpsService.ProcessFile(mainWindowView._filePath, mainWindowView, downloadedFile?.originalName ?? "");
+
+        mainWindowView.DeepLinkPath = null;
+
         mainWindowView.Status = NotificationService.Messages.DownloadSuccessful;
         await _notificationService.ShowNotificationAsync(mainWindowView.Status);
       }

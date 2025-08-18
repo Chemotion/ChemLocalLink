@@ -33,6 +33,17 @@ public class WindowMenuBehavior : Behavior<MenuItem>
     set => SetValue(CommandsProperty, value);
   }
 
+  public static readonly StyledProperty<object> FileModelProperty = AvaloniaProperty.Register<
+    WindowMenuBehavior,
+    object
+  >(nameof(FileModel));
+
+  public object FileModel
+  {
+    get => GetValue(FileModelProperty);
+    set => SetValue(FileModelProperty, value);
+  }
+
   protected override void OnAttached()
   {
     base.OnAttached();
@@ -58,6 +69,14 @@ public class WindowMenuBehavior : Behavior<MenuItem>
       if (Commands != null)
       {
         var viewModel = ViewModel as MainWindowViewModel;
+
+        var fileModel = FileModel as ChemLocalLink.Models.DownloadModel;
+
+        if (fileModel != null && viewModel != null)
+        {
+          viewModel.SelectFile(fileModel);
+        }
+
         switch (Commands as string)
         {
           case "uploadndelete":

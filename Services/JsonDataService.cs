@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using ChemLocalLink.ViewModels;
 using Newtonsoft.Json;
@@ -60,7 +61,26 @@ internal class JsonDataService : IJsonDataService
   {
     Directory.CreateDirectory(_appDataPath);
     var jsonFilePath = Path.Combine(_appDataPath, "downloads.json");
-    var data = JsonConvert.SerializeObject(mainWindowViewModel.DownloadedFiles, Formatting.Indented);
+    var data = JsonConvert.SerializeObject(
+      mainWindowViewModel.DownloadedFiles.Select(d => new
+      {
+        d.FileId,
+        d.FileName,
+        d.OriginalFileName,
+        d.FilePath,
+        d.FileSumOnDownload,
+        d.FileSize,
+        d.FileDownloadTimeStamp,
+        d.IsEdited,
+        d.Exp,
+        d.Origin,
+        d.Path,
+        d.Token,
+        d.SourceUrl,
+        d.IsKept
+      }),
+      Formatting.Indented
+    );
     var tmp = jsonFilePath + ".tmp";
     await File.WriteAllTextAsync(tmp, data);
     if (File.Exists(jsonFilePath))

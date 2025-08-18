@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -102,6 +103,11 @@ public class WindowService : IWindowService
             {
               if (File.Exists(download.FilePath))
               {
+                if (download.Path == null)
+                  download.Path = string.Empty;
+                if (download.Token == null && !string.IsNullOrWhiteSpace(mainWindowView.Url))
+                  download.Token = download.FilePath.ExtractAuthToken();
+
                 if (download.IsKept && download.IsEdited)
                   download.IsEdited = false;
 
@@ -124,7 +130,7 @@ public class WindowService : IWindowService
               }
             }
 
-            var newData = JsonConvert.SerializeObject(mainWindowView.DownloadedFiles.Reverse());
+            var newData = JsonConvert.SerializeObject(mainWindowView.DownloadedFiles.Reverse(), Formatting.Indented);
             File.WriteAllText(filePath, newData);
             mainWindowView.HasFilesDownloaded = mainWindowView.DownloadedFiles.Count > 0;
 
@@ -138,24 +144,53 @@ public class WindowService : IWindowService
 
         if (mainWindowView.args?.Length > 0)
         {
-          var parsedUrl = mainWindowView.args.First().ParseUrl();
-          if (parsedUrl == null || parsedUrl == "invalid uri")
+          var originalUrl = mainWindowView.args.First();
+
+          try
+          {
+            var uri = new Uri(originalUrl);
+            var queryParams = HttpUtility.ParseQueryString(uri.Query);
+            string? urlParam = queryParams.Get("url");
+            string? pathParam = queryParams.Get("path");
+
+            if (string.IsNullOrEmpty(urlParam))
+            {
+              mainWindowView.Status = NotificationService.Messages.InvalidUrl;
+              await _notificationService.ShowNotificationAsync(mainWindowView.Status);
+              return;
+            }
+
+            var parsedUrl = HttpUtility.UrlDecode(urlParam);
+
+            if (!string.IsNullOrEmpty(pathParam))
+            {
+              mainWindowView.DeepLinkPath = HttpUtility.UrlDecode(pathParam);
+            }
+
+            if (parsedUrl == null || parsedUrl == "invalid uri")
+            {
+              mainWindowView.Status = NotificationService.Messages.InvalidUrl;
+              await _notificationService.ShowNotificationAsync(mainWindowView.Status);
+              return;
+            }
+
+            var authToken = parsedUrl.ExtractAuthToken();
+            if (authToken == null)
+            {
+              mainWindowView.Status = NotificationService.Messages.TokenFail;
+              await _notificationService.ShowNotificationAsync(mainWindowView.Status);
+              return;
+            }
+
+            mainWindowView.Url = parsedUrl;
+            await _workflowService.HandleProcess(mainWindowView, parsedUrl);
+          }
+          catch (Exception)
           {
             mainWindowView.Status = NotificationService.Messages.InvalidUrl;
             await _notificationService.ShowNotificationAsync(mainWindowView.Status);
             return;
           }
-
-          var authToken = parsedUrl.ExtractAuthToken();
-          if (authToken == null)
-          {
-            mainWindowView.Status = NotificationService.Messages.TokenFail;
-            await _notificationService.ShowNotificationAsync(mainWindowView.Status);
-            return;
-          }
-
-          mainWindowView.Url = parsedUrl;
-          await _workflowService.HandleProcess(mainWindowView, parsedUrl);
         }
       }
       catch (Exception ex)

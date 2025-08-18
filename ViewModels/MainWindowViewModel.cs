@@ -3,6 +3,7 @@
 /// </summary>
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -113,6 +114,9 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
   [ObservableProperty]
   string _authToken = "";
+
+  [ObservableProperty]
+  string? _deepLinkPath;
 
   [ObservableProperty]
   [NotifyPropertyChangedFor(nameof(ThemeToolTip))]
@@ -245,7 +249,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
   [RelayCommand]
   public void OpenDownloadDirectory()
   {
-    var folderPath = _pathService.GetDownloadDirectory();
+    var folderPath =
+      SelectedDownloadedFile != null
+        ? Path.GetDirectoryName(SelectedDownloadedFile.FilePath) ?? _pathService.GetDownloadDirectory()
+        : _pathService.GetDownloadDirectory();
+
+    Debug.WriteLine($"Opening folder: {folderPath}");
 
     if (Directory.Exists(folderPath))
     {
@@ -312,10 +321,14 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     if (selectedFile == null)
       return;
 
+    string? fileDirectory = null;
     try
     {
       if (File.Exists(selectedFile.FilePath))
+      {
+        fileDirectory = Path.GetDirectoryName(selectedFile.FilePath);
         File.Delete(selectedFile.FilePath);
+      }
       var backup = selectedFile.FilePath + "~";
       if (File.Exists(backup))
         File.Delete(backup);
@@ -323,6 +336,11 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     catch { }
 
     DownloadedFiles.Remove(selectedFile);
+
+    if (fileDirectory != null)
+    {
+      CleanupEmptyDirectories(fileDirectory);
+    }
 
     var appDataPath = Path.Combine(
       Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -332,7 +350,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     var jsonFilePath = Path.Combine(appDataPath, "downloads.json");
     if (File.Exists(jsonFilePath) && !string.IsNullOrEmpty(File.ReadAllText(jsonFilePath)))
     {
-      var data = JsonConvert.SerializeObject(DownloadedFiles);
+      var data = JsonConvert.SerializeObject(DownloadedFiles, Formatting.Indented);
       File.WriteAllText(jsonFilePath, data);
     }
     HasFilesDownloaded = DownloadedFiles.Count > 0;
@@ -350,6 +368,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
   public async Task<bool> ImportSession(string sourcePath)
   {
     return await _sessionService.ImportSessionAsync(this, sourcePath);
+  }
+
+  [RelayCommand]
+  public void SelectFile(DownloadModel file)
+  {
+    SelectedDownloadedFile = file;
   }
 
   partial void OnStatusChanged(string? oldValue, string? newValue)
@@ -391,12 +415,30 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
       {
         var groups = DownloadedFiles
           .GroupBy(d => (d.Origin ?? string.Empty).Trim().ToLowerInvariant())
-          .Select(g => new OriginGroupModel
+          .Select(g =>
           {
-            Origin = string.IsNullOrWhiteSpace(g.Key)
+            var originName = string.IsNullOrWhiteSpace(g.Key)
               ? "Unknown"
-              : g.Select(x => x.Origin).FirstOrDefault(o => !string.IsNullOrWhiteSpace(o)) ?? g.Key,
-            Files = new ObservableCollection<DownloadModel>(g.OrderByDescending(f => f.FileDownloadTimeStamp))
+              : g.Select(x => x.Origin).FirstOrDefault(o => !string.IsNullOrWhiteSpace(o)) ?? g.Key;
+
+            var originGroup = new OriginGroupModel { Origin = originName };
+
+            var filesByPath = g.GroupBy(f => f.Path ?? string.Empty).ToList();
+
+            var filesWithoutPaths =
+              filesByPath.FirstOrDefault(fp => string.IsNullOrEmpty(fp.Key))?.ToList() ?? new List<DownloadModel>();
+            foreach (var file in filesWithoutPaths.OrderByDescending(f => f.FileDownloadTimeStamp))
+            {
+              originGroup.Files.Add(file);
+            }
+
+            var filesWithPaths = filesByPath.Where(fp => !string.IsNullOrEmpty(fp.Key)).ToList();
+            if (filesWithPaths.Any())
+            {
+              BuildFolderHierarchy(originGroup, filesWithPaths);
+            }
+
+            return originGroup;
           })
           .OrderBy(g => g.Origin)
           .ToList();
@@ -414,6 +456,28 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     }
   }
 
+  private void BuildFolderHierarchy(OriginGroupModel originGroup, List<IGrouping<string, DownloadModel>> filesWithPaths)
+  {
+    foreach (var pathGroup in filesWithPaths)
+    {
+      var fullPath = pathGroup.Key;
+      var files = pathGroup.OrderByDescending(f => f.FileDownloadTimeStamp).ToList();
+
+      var collapsedFolder = new FolderModel
+      {
+        Name = fullPath,
+        FullPath = fullPath,
+        IsCollapsed = false
+      };
+      foreach (var f in files)
+      {
+        collapsedFolder.Files.Add(f);
+      }
+
+      originGroup.Folders.Add(collapsedFolder);
+    }
+  }
+
   partial void OnHasFilesDownloadedChanged(bool value)
   {
     RebuildGroups();
@@ -424,12 +488,21 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
   {
     try
     {
+      var directoriesToCheck = new HashSet<string>();
+
       foreach (var d in DownloadedFiles.ToList())
       {
         try
         {
           if (File.Exists(d.FilePath))
+          {
+            var fileDirectory = Path.GetDirectoryName(d.FilePath);
+            if (fileDirectory != null)
+            {
+              directoriesToCheck.Add(fileDirectory);
+            }
             File.Delete(d.FilePath);
+          }
 
           var backup = d.FilePath + "~";
           if (File.Exists(backup))
@@ -440,6 +513,12 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
       DownloadedFiles.Clear();
       HasFilesDownloaded = false;
       await _jsonDataService.WriteDataToAppData(this);
+
+      // Clean up empty directories
+      foreach (var directory in directoriesToCheck)
+      {
+        CleanupEmptyDirectories(directory);
+      }
 
       // purge any stray backup files
       try
@@ -465,5 +544,49 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     {
       Status = "Clear failed";
     }
+  }
+
+  private void CleanupEmptyDirectories(string startDirectory)
+  {
+    try
+    {
+      var downloadRoot = _pathService.GetDownloadDirectory();
+      var currentDir = startDirectory;
+
+      while (
+        !string.IsNullOrEmpty(currentDir)
+        && currentDir.Length > downloadRoot.Length
+        && currentDir.StartsWith(downloadRoot, StringComparison.OrdinalIgnoreCase)
+      )
+      {
+        try
+        {
+          if (Directory.Exists(currentDir))
+          {
+            var files = Directory.GetFiles(currentDir);
+            var subdirs = Directory.GetDirectories(currentDir);
+
+            if (files.Length == 0 && subdirs.Length == 0)
+            {
+              Directory.Delete(currentDir);
+              currentDir = Path.GetDirectoryName(currentDir);
+            }
+            else
+            {
+              break;
+            }
+          }
+          else
+          {
+            currentDir = Path.GetDirectoryName(currentDir);
+          }
+        }
+        catch
+        {
+          break;
+        }
+      }
+    }
+    catch { }
   }
 }

@@ -3,6 +3,7 @@
 /// </summary>
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -94,7 +95,27 @@ internal class FileOpsService : IFileOpsService
       }
 
       var fileName = contentDisposition[(contentDisposition.IndexOf("=", StringComparison.Ordinal) + 1)..];
-      var fileDir = _pathService.GetDownloadDirectory();
+      var baseDir = _pathService.GetDownloadDirectory();
+      Directory.CreateDirectory(baseDir);
+
+      var originHost = mainWindowView.Url.ExtractOriginHost() ?? "Unknown";
+      var originDir = Path.Combine(baseDir, originHost);
+
+      string fileDir;
+      if (!string.IsNullOrEmpty(mainWindowView.DeepLinkPath))
+      {
+        var pathSegments = mainWindowView.DeepLinkPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        fileDir = originDir;
+        foreach (var segment in pathSegments)
+        {
+          fileDir = Path.Combine(fileDir, segment);
+        }
+      }
+      else
+      {
+        fileDir = originDir;
+      }
+
       Directory.CreateDirectory(fileDir);
 
       var filePath = Path.Combine(fileDir, fileName).NormalizePath();
@@ -183,6 +204,7 @@ internal class FileOpsService : IFileOpsService
           IsEdited = false,
           Exp = exp,
           Origin = originHost,
+          Path = mainWindowView.DeepLinkPath,
           Token = token,
           SourceUrl = mainWindowView.Url
         };
@@ -208,6 +230,7 @@ internal class FileOpsService : IFileOpsService
           IsEdited = false,
           Exp = exp,
           Origin = originHost,
+          Path = mainWindowView.DeepLinkPath,
           Token = token,
           SourceUrl = mainWindowView.Url
         };
@@ -339,13 +362,25 @@ internal class FileOpsService : IFileOpsService
     {
       if (role == "delete")
       {
+        var directoriesToCleanup = new List<string>();
+
         foreach (var file in filesToRemove)
         {
           mainWindowViewModel.DownloadedFiles.Remove(file);
           if (File.Exists(file.FilePath))
           {
+            var fileDirectory = Path.GetDirectoryName(file.FilePath);
+            if (fileDirectory != null)
+            {
+              directoriesToCleanup.Add(fileDirectory);
+            }
             File.Delete(file.FilePath);
           }
+        }
+
+        foreach (var directory in directoriesToCleanup.Distinct())
+        {
+          CleanupEmptyDirectories(directory, mainWindowViewModel);
         }
       }
       else
@@ -391,8 +426,24 @@ internal class FileOpsService : IFileOpsService
 
   private bool DeleteFile(DownloadModel file, MainWindowViewModel mainWindowViewModel)
   {
-    File.Delete(file.FilePath);
+    string? fileDirectory = null;
+    try
+    {
+      if (File.Exists(file.FilePath))
+      {
+        fileDirectory = Path.GetDirectoryName(file.FilePath);
+        File.Delete(file.FilePath);
+      }
+    }
+    catch { }
+
     mainWindowViewModel.DownloadedFiles.RemoveAt(mainWindowViewModel.SelectedDownloadedFileIndex);
+
+    if (fileDirectory != null)
+    {
+      CleanupEmptyDirectories(fileDirectory, mainWindowViewModel);
+    }
+
     _jsonDataService.WriteDataToAppData(mainWindowViewModel);
     mainWindowViewModel.RebuildGroups();
     return true;
@@ -450,9 +501,7 @@ internal class FileOpsService : IFileOpsService
         { new ByteArrayContent(fileContentBytes), "file", Path.GetFileName(normalizedPath) },
       };
 
-      var fileName = !string.IsNullOrEmpty(ogIsm)
-        ? ogIsm
-        : fileModel.OriginalFileName ?? new FileInfo(normalizedPath).Name;
+      var fileName = Path.GetFileName(normalizedPath);
       content.Add(new StringContent(fileName), "attachmentName");
 
       var fileSize = new FileInfo(normalizedPath).Length.FormatBytes();
@@ -501,6 +550,50 @@ internal class FileOpsService : IFileOpsService
       await _notificationService.ShowNotificationAsync(mainView.Status);
       return false;
     }
+  }
+
+  private void CleanupEmptyDirectories(string startDirectory, MainWindowViewModel mainWindowViewModel)
+  {
+    try
+    {
+      var downloadRoot = _pathService.GetDownloadDirectory();
+      var currentDir = startDirectory;
+
+      while (
+        !string.IsNullOrEmpty(currentDir)
+        && currentDir.Length > downloadRoot.Length
+        && currentDir.StartsWith(downloadRoot, StringComparison.OrdinalIgnoreCase)
+      )
+      {
+        try
+        {
+          if (Directory.Exists(currentDir))
+          {
+            var files = Directory.GetFiles(currentDir);
+            var subdirs = Directory.GetDirectories(currentDir);
+
+            if (files.Length == 0 && subdirs.Length == 0)
+            {
+              Directory.Delete(currentDir);
+              currentDir = Path.GetDirectoryName(currentDir);
+            }
+            else
+            {
+              break;
+            }
+          }
+          else
+          {
+            currentDir = Path.GetDirectoryName(currentDir);
+          }
+        }
+        catch
+        {
+          break;
+        }
+      }
+    }
+    catch { }
   }
 
   #endregion

@@ -18,6 +18,7 @@
     <UserControl.Resources>
         <converters:DateTimeToStringConverter x:Key="DateToString" />
         <converters:FileExtensionToIconConverter x:Key="FileExtensionToIcon" />
+        <converters:FileSelectionConverter x:Key="FileSelectionConverter" />
     </UserControl.Resources>
     <UserControl.DataTemplates>
         <DataTemplate DataType="{x:Type models:DownloadModel}">
@@ -32,30 +33,35 @@
                         <MenuItem Header="Upload &amp; delete locally">
                             <Interaction.Behaviors>
                                 <extensions:WindowMenuBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
+                                                               FileModel="{Binding}"
                                                                Commands="uploadndelete" />
                             </Interaction.Behaviors>
                         </MenuItem>
                         <MenuItem Header="Upload &amp; keep locally">
                             <Interaction.Behaviors>
                                 <extensions:WindowMenuBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
+                                                               FileModel="{Binding}"
                                                                Commands="uploadnkeep" />
                             </Interaction.Behaviors>
                         </MenuItem>
                         <MenuItem Header="Delete file locally">
                             <Interaction.Behaviors>
                                 <extensions:WindowMenuBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
+                                                               FileModel="{Binding}"
                                                                Commands="deleteFile" />
                             </Interaction.Behaviors>
                         </MenuItem>
                         <MenuItem Header="Open file">
                             <Interaction.Behaviors>
                                 <extensions:WindowMenuBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
+                                                               FileModel="{Binding}"
                                                                Commands="openFile" />
                             </Interaction.Behaviors>
                         </MenuItem>
                         <MenuItem Header="Open folder">
                             <Interaction.Behaviors>
                                 <extensions:WindowMenuBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
+                                                               FileModel="{Binding}"
                                                                Commands="openDir" />
                             </Interaction.Behaviors>
                         </MenuItem>
@@ -168,16 +174,9 @@
     <TreeView Background="Transparent"
               ItemsSource="{Binding DownloadedByOrigin}"
               IsVisible="{Binding HasFilesDownloaded}"
-              SelectedItem="{Binding SelectedDownloadedFile, Mode=TwoWay}"
               x:Name="DownTree"
               Padding="24,12"
               ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-        <Interaction.Behaviors>
-            <EventTriggerBehavior EventName="DoubleTapped">
-                <InvokeCommandAction Command="{Binding OnDownloadDoubleTapped}"
-                                     PassEventArgsToCommand="True" />
-            </EventTriggerBehavior>
-        </Interaction.Behaviors>
         <TreeView.Styles>
             <Style Selector="TreeViewItem">
                 <Setter Property="Margin"
@@ -192,24 +191,79 @@
                         Value="8" />
                 <Setter Property="IsExpanded"
                         Value="True" />
+                <Setter Property="Focusable"
+                        Value="False" />
+                <Setter Property="IsTabStop"
+                        Value="False" />
+                <Setter Property="IsSelected"
+                        Value="False" />
             </Style>
             <Style Selector="TreeViewItem:pointerover">
                 <Setter Property="Background"
-                        Value="{DynamicResource SystemControlBackgroundListLowBrush}" />
+                        Value="Transparent" />
+                <Setter Property="BorderBrush"
+                        Value="Transparent" />
             </Style>
             <Style Selector="TreeViewItem:selected">
                 <Setter Property="Background"
-                        Value="{DynamicResource SystemControlHighlightListAccentLowBrush}" />
-                <Setter Property="Foreground"
-                        Value="{DynamicResource SystemControlHighlightAltBaseHighBrush}" />
+                        Value="Transparent" />
+                <Setter Property="BorderBrush"
+                        Value="Transparent" />
+                <Setter Property="IsSelected"
+                        Value="False" />
+            </Style>
+            <Style Selector="TreeViewItem:pressed">
+                <Setter Property="Background"
+                        Value="Transparent" />
+                <Setter Property="BorderBrush"
+                        Value="Transparent" />
+            </Style>
+            <Style Selector="TreeViewItem:focus">
+                <Setter Property="Background"
+                        Value="Transparent" />
+                <Setter Property="BorderBrush"
+                        Value="Transparent" />
+            </Style>
+            <Style Selector="TreeViewItem /template/ ContentPresenter">
+                <Setter Property="Background"
+                        Value="Transparent" />
+                <Setter Property="BorderBrush"
+                        Value="Transparent" />
+            </Style>
+            <Style Selector="TreeViewItem:pointerover /template/ ContentPresenter">
+                <Setter Property="Background"
+                        Value="Transparent" />
+                <Setter Property="BorderBrush"
+                        Value="Transparent" />
+            </Style>
+            <Style Selector="TreeViewItem:selected /template/ ContentPresenter">
+                <Setter Property="Background"
+                        Value="Transparent" />
+                <Setter Property="BorderBrush"
+                        Value="Transparent" />
+            </Style>
+            <Style Selector="TreeViewItem:pressed /template/ ContentPresenter">
+                <Setter Property="Background"
+                        Value="Transparent" />
+                <Setter Property="BorderBrush"
+                        Value="Transparent" />
+            </Style>
+            <Style Selector="TreeViewItem Border">
+                <Setter Property="Background"
+                        Value="Transparent" />
+            </Style>
+            <Style Selector="TreeViewItem:pointerover Border">
+                <Setter Property="Background"
+                        Value="Transparent" />
             </Style>
         </TreeView.Styles>
         <TreeView.ItemTemplate>
             <TreeDataTemplate DataType="{x:Type models:OriginGroupModel}"
-                              ItemsSource="{Binding Files}">
+                              ItemsSource="{Binding Items}">
                 <Border Background="Transparent"
                         Padding="2,0"
-                        CornerRadius="6">
+                        CornerRadius="6"
+                        IsHitTestVisible="False">
                     <StackPanel Orientation="Horizontal"
                                 Spacing="6">
                         <avalonia:Icon Value="fa-solid fa-folder"
@@ -222,5 +276,102 @@
                 </Border>
             </TreeDataTemplate>
         </TreeView.ItemTemplate>
+        <TreeView.DataTemplates>
+            <DataTemplate DataType="{x:Type models:FolderModel}">
+                <StackPanel Background="Transparent">
+                    <StackPanel.Styles>
+                        <Style Selector="StackPanel">
+                            <Setter Property="Background"
+                                    Value="Transparent" />
+                        </Style>
+                        <Style Selector="StackPanel:pointerover">
+                            <Setter Property="Background"
+                                    Value="Transparent" />
+                        </Style>
+                    </StackPanel.Styles>
+                    <Border Background="Transparent"
+                            Padding="2,4"
+                            CornerRadius="6"
+                            Margin="0,2"
+                            IsHitTestVisible="False">
+                        <Border.Styles>
+                            <Style Selector="Border">
+                                <Setter Property="Background"
+                                        Value="Transparent" />
+                            </Style>
+                            <Style Selector="Border:pointerover">
+                                <Setter Property="Background"
+                                        Value="Transparent" />
+                            </Style>
+                        </Border.Styles>
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="6">
+                            <Border Width="1"
+                                    Height="20"
+                                    Background="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                    Opacity="0.3"
+                                    Margin="4,0" />
+                            <avalonia:Icon Value="fa-solid fa-folder-open"
+                                           Width="16"
+                                           Height="16"
+                                           Foreground="{DynamicResource SystemAccentColor}" />
+                            <TextBlock Text="{Binding Name}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+                            <TextBlock Text="{Binding Files.Count, StringFormat=({0})}"
+                                       FontSize="10"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                    <StackPanel Margin="24,0,0,8">
+                        <ItemsControl ItemsSource="{Binding Files}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button BorderThickness="0"
+                                            Padding="0"
+                                            Margin="0,1"
+                                            CornerRadius="6"
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Stretch"
+                                            VerticalContentAlignment="Stretch"
+                                            Command="{Binding $parent[TreeView].((viewModels:MainWindowViewModel)DataContext).SelectFileCommand}"
+                                            CommandParameter="{Binding}">
+                                        <Button.Background>
+                                            <MultiBinding Converter="{StaticResource FileSelectionConverter}">
+                                                <Binding Path="." />
+                                                <Binding Path="$parent[TreeView].((viewModels:MainWindowViewModel)DataContext).SelectedDownloadedFile" />
+                                            </MultiBinding>
+                                        </Button.Background>
+                                        <Button.Styles>
+                                            <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                                <Setter Property="Background"
+                                                        Value="{DynamicResource SystemControlBackgroundListLowBrush}" />
+                                            </Style>
+                                            <Style Selector="Button:pressed /template/ ContentPresenter">
+                                                <Setter Property="Background"
+                                                        Value="{DynamicResource SystemControlBackgroundListMediumBrush}" />
+                                            </Style>
+                                        </Button.Styles>
+                                        <ContentControl Content="{Binding}" />
+                                        <Interaction.Behaviors>
+                                            <EventTriggerBehavior EventName="DoubleTapped">
+                                                <InvokeCommandAction Command="{Binding $parent[TreeView].((viewModels:MainWindowViewModel)DataContext).OnDownloadDoubleTapped}"
+                                                                     CommandParameter="{Binding}" />
+                                            </EventTriggerBehavior>
+                                        </Interaction.Behaviors>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+        </TreeView.DataTemplates>
     </TreeView>
 </UserControl>

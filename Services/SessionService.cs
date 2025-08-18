@@ -63,7 +63,9 @@ internal class SessionService : ISessionService
           FileId = d.FileId,
           FileName = d.FileName,
           OriginalFileName = d.OriginalFileName,
-          FileRelativeName = Path.GetFileName(d.FilePath),
+          FileRelativeName = !string.IsNullOrWhiteSpace(d.Path)
+            ? $"{d.Path}/{Path.GetFileName(d.FilePath)}"
+            : Path.GetFileName(d.FilePath),
           FileDownloadTimeStamp = d.FileDownloadTimeStamp,
           FileSize = d.FileSize,
           FileSumOnDownload = d.FileSumOnDownload,
@@ -71,6 +73,7 @@ internal class SessionService : ISessionService
           IsKept = d.IsKept,
           Exp = d.Exp,
           Origin = d.Origin,
+          Path = d.Path,
           Token = d.Token,
           SourceUrl = d.SourceUrl
         })
@@ -87,7 +90,19 @@ internal class SessionService : ISessionService
         try
         {
           var fileName = Path.GetFileName(d.FilePath);
-          var entry = zip.CreateEntry($"files/{fileName}", CompressionLevel.Optimal);
+          string entryPath;
+
+          if (!string.IsNullOrWhiteSpace(d.Path))
+          {
+            // preserve folder structure
+            entryPath = $"files/{d.Path}/{fileName}";
+          }
+          else
+          {
+            entryPath = $"files/{fileName}";
+          }
+
+          var entry = zip.CreateEntry(entryPath, CompressionLevel.Optimal);
           using var fs = File.OpenRead(d.FilePath);
           using var es = entry.Open();
           await fs.CopyToAsync(es);
@@ -116,6 +131,7 @@ internal class SessionService : ISessionService
     public bool IsKept { get; set; }
     public long Exp { get; set; }
     public string Origin { get; set; } = string.Empty;
+    public string? Path { get; set; }
     public string? Token { get; set; }
     public string? SourceUrl { get; set; }
   }
@@ -173,13 +189,26 @@ internal class SessionService : ISessionService
           if (sourceFileEntry == null)
             continue; // missing file
 
-          var destPath = Path.Combine(targetDir, pd.FileRelativeName).NormalizePath();
-          var nameNoExt = Path.GetFileNameWithoutExtension(pd.FileRelativeName);
-          var ext = Path.GetExtension(pd.FileRelativeName);
+          // Create the target path including folder structure
+          string destPath;
+          if (!string.IsNullOrWhiteSpace(pd.Path))
+          {
+            var folderPath = Path.Combine(targetDir, pd.Path);
+            Directory.CreateDirectory(folderPath);
+            destPath = Path.Combine(folderPath, Path.GetFileName(pd.FileRelativeName)).NormalizePath();
+          }
+          else
+          {
+            destPath = Path.Combine(targetDir, Path.GetFileName(pd.FileRelativeName)).NormalizePath();
+          }
+
+          var nameNoExt = Path.GetFileNameWithoutExtension(destPath);
+          var ext = Path.GetExtension(destPath);
+          var baseDir = Path.GetDirectoryName(destPath)!;
           int counter = 1;
           while (File.Exists(destPath))
           {
-            destPath = Path.Combine(targetDir, $"{nameNoExt}-{counter}{ext}").NormalizePath();
+            destPath = Path.Combine(baseDir, $"{nameNoExt}-{counter}{ext}").NormalizePath();
             counter++;
           }
 
@@ -203,6 +232,7 @@ internal class SessionService : ISessionService
             IsKept = pd.IsKept,
             Exp = pd.Exp,
             Origin = pd.Origin,
+            Path = pd.Path,
             Token = pd.Token,
             SourceUrl = pd.SourceUrl
           };

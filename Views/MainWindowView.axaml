@@ -12,7 +12,7 @@
         xmlns:viewModels="clr-namespace:ChemLocalLink.ViewModels"
         xmlns:converters="clr-namespace:ChemLocalLink.Utilities"
         xmlns:views="clr-namespace:ChemLocalLink.Views"
-        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaToDecorationsHint="False"
         WindowStartupLocation="Manual"
         SystemDecorations="Full"
         Focusable="True">

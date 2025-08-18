@@ -1,0 +1,106 @@
+/// <summary>
+/// Enables context menu command routing in Avalonia
+/// </summary>
+
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Xaml.Interactivity;
+using ChemLocalLink.ViewModels;
+using CommunityToolkit.Mvvm.Input;
+
+namespace ChemLocalLink.Utilities;
+
+public class WindowMenuBehavior : Behavior<MenuItem>
+{
+  public static readonly StyledProperty<object> ViewModelProperty = AvaloniaProperty.Register<
+    WindowMenuBehavior,
+    object
+  >(nameof(ViewModel));
+
+  public object ViewModel
+  {
+    get => GetValue(ViewModelProperty);
+    set => SetValue(ViewModelProperty, value);
+  }
+  public static readonly StyledProperty<object> CommandsProperty = AvaloniaProperty.Register<
+    WindowMenuBehavior,
+    object
+  >(nameof(IRelayCommand));
+
+  public object Commands
+  {
+    get => GetValue(CommandsProperty);
+    set => SetValue(CommandsProperty, value);
+  }
+
+  public static readonly StyledProperty<object> FileModelProperty = AvaloniaProperty.Register<
+    WindowMenuBehavior,
+    object
+  >(nameof(FileModel));
+
+  public object FileModel
+  {
+    get => GetValue(FileModelProperty);
+    set => SetValue(FileModelProperty, value);
+  }
+
+  protected override void OnAttached()
+  {
+    base.OnAttached();
+    if (AssociatedObject != null)
+    {
+      AssociatedObject.Click += OnMenuItemClick!;
+    }
+  }
+
+  protected override void OnDetaching()
+  {
+    base.OnDetaching();
+    if (AssociatedObject != null)
+    {
+      AssociatedObject.Click -= OnMenuItemClick!;
+    }
+  }
+
+  private async void OnMenuItemClick(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+  {
+    if (ViewModel != null)
+    {
+      if (Commands != null)
+      {
+        var viewModel = ViewModel as MainWindowViewModel;
+
+        var fileModel = FileModel as ChemLocalLink.Models.DownloadModel;
+
+        if (fileModel != null && viewModel != null)
+        {
+          viewModel.SelectFile(fileModel);
+        }
+
+        switch (Commands as string)
+        {
+          case "uploadndelete":
+            await viewModel!.UploadFiles("delete");
+            break;
+          case "uploadnkeep":
+            await viewModel!.UploadFiles("");
+            break;
+          case "deleteFile":
+            viewModel?.DeleteSelectedFile();
+            break;
+          case "duplicateFile":
+            await viewModel!.DuplicateAndRenameFile();
+            break;
+          case "openFile":
+            viewModel?.OpenFile();
+            break;
+          case "openDir":
+            viewModel?.OpenDownloadDirectory();
+            break;
+          default:
+            break;
+        }
+      }
+    }
+  }
+}

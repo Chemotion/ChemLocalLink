@@ -1,66 +1,103 @@
-﻿using Avalonia;
+﻿/// <summary>
+/// Manages system tray icon, context menu, and user interactions
+/// </summary>
+
+using System;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using ChemLocalLink.ViewModels;
 using CommunityToolkit.Mvvm.Input;
-using urlhandler.Helpers;
-using urlhandler.ViewModels;
-using System;
 
-namespace urlhandler.Services;
+namespace ChemLocalLink.Services;
 
-public interface ITrayService {
-    void InitializeTray(MainWindowViewModel viewModel);
+public interface ITrayService
+{
+  void InitializeTray(MainWindowViewModel viewModel, IWindowService windowService);
 }
 
-public class TrayService : ITrayService {
-    private TrayIcon? _notifyIcon;
-    private MainWindowViewModel? _mainWindowViewModel;
+public class TrayService : ITrayService
+{
+  private TrayIcon? _notifyIcon;
+  private MainWindowViewModel? _mainWindowViewModel;
 
-    public void InitializeTray(MainWindowViewModel viewModel) {
-        _mainWindowViewModel = viewModel;
+  public TrayService() { }
 
-        var _trayMenu = new NativeMenu {
-            new NativeMenuItem {
-                Header = "Open app",
-                Command = new RelayCommand(() => {
-                    Dispatcher.UIThread.Invoke(() => {
-                        _mainWindowViewModel!.mainWindow.WindowState = WindowState.Normal;
-                        _mainWindowViewModel.mainWindow.ShowInTaskbar = true;
-                    });
-                })
-            },
-            new NativeMenuItem {
-                Header = "Upload all edited files & delete locally",
-                Command = new AsyncRelayCommand(async () => await _mainWindowViewModel!.UploadFiles("delete"))
-            },
-            new NativeMenuItem {
-                Header = "Upload all edited files & keep locally",
-                Command = new AsyncRelayCommand(async () => await _mainWindowViewModel!.UploadFiles(""))
-            },
-            new NativeMenuItem {
-                Header = "Open files folder",
-                Command = new RelayCommand(() => _mainWindowViewModel!.OpenDownloadDirectory())
-            },
-            new NativeMenuItem {
-                Header = "Exit app",
-                Command = new RelayCommand(() => {
-                    if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopApp) {
-                        desktopApp.Shutdown();
-                    }
-                })
+  public void InitializeTray(MainWindowViewModel viewModel, IWindowService windowService)
+  {
+    _mainWindowViewModel = viewModel;
+
+    var _trayMenu = new NativeMenu
+    {
+      new NativeMenuItem
+      {
+        Header = "Open app",
+        Command = new RelayCommand(() =>
+        {
+          Dispatcher.UIThread.Invoke(() =>
+          {
+            windowService.ShowWindow();
+          });
+        })
+      },
+      new NativeMenuItem
+      {
+        Header = "Upload all edited files & delete locally",
+        Command = new AsyncRelayCommand(async () => await _mainWindowViewModel!.UploadFiles("delete"))
+      },
+      new NativeMenuItem
+      {
+        Header = "Upload all edited files & keep locally",
+        Command = new AsyncRelayCommand(async () => await _mainWindowViewModel!.UploadFiles(""))
+      },
+      new NativeMenuItemSeparator(),
+      new NativeMenuItem
+      {
+        Header = "Reload app",
+        Command = new RelayCommand(() =>
+        {
+          Dispatcher.UIThread.Post(() =>
+          {
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+              var process = new System.Diagnostics.Process
+              {
+                StartInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                  FileName = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "",
+                  UseShellExecute = false,
+                },
+              };
+              process.Start();
+              desktop.Shutdown(0);
             }
-        };
+          });
+        }),
+      },
+      new NativeMenuItem
+      {
+        Header = "Exit app",
+        Command = new RelayCommand(() =>
+        {
+          if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+          {
+            desktop.Shutdown(0);
+          }
+        }),
+      },
+    };
 
-        _notifyIcon = new TrayIcon {
-            Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://urlhandler/Assets/icon.ico"))),
-            IsVisible = true,
-            ToolTipText = "ChemLocalLink",
-            Menu = _trayMenu
-        };
+    _notifyIcon = new TrayIcon
+    {
+      Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://ChemLocalLink/Assets/icon.ico"))),
+      IsVisible = true,
+      ToolTipText = "ChemLocalLink",
+      Menu = _trayMenu,
+    };
 
-        // wire up events
-        _notifyIcon.Clicked += (sender, e) => WindowHelper.ShowWindow();
-    }
+    // wire up events
+    _notifyIcon.Clicked += (sender, e) => windowService.ShowWindow();
+  }
 }

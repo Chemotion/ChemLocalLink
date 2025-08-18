@@ -1,0 +1,221 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="ChemLocalLink.Views.MainWindowView"
+        Title="ChemLocalLink"
+        Width="800"
+        Height="800"
+        MinWidth="600"
+        MinHeight="600"
+        x:DataType="viewModels:MainWindowViewModel"
+        Icon="/Assets/icon.ico"
+        xmlns:i="https://github.com/projektanker/icons.avalonia"
+        xmlns:viewModels="clr-namespace:ChemLocalLink.ViewModels"
+        xmlns:converters="clr-namespace:ChemLocalLink.Utilities"
+        xmlns:views="clr-namespace:ChemLocalLink.Views"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowStartupLocation="Manual"
+        SystemDecorations="Full"
+        Focusable="True">
+    <Window.Resources>
+        <converters:IndexToBooleanConverter x:Key="IndextoBool" />
+    </Window.Resources>
+    <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+        <Grid RowDefinitions="Auto,*,Auto">
+            <Border Grid.Row="0"
+                    Padding="16,8">
+                <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+                    <Image Grid.Column="0"
+                           Source="/Assets/icon.png"
+                           Height="40"
+                           VerticalAlignment="Center"
+                           Margin="8,0,8,0" />
+                    <TextBlock Grid.Column="1"
+                               Text="ChemLocalLink"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left"
+                               Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+                    <StackPanel Grid.Column="3"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Spacing="8">
+                        <ToggleButton IsChecked="{Binding IsDarkMode}"
+                                      Height="32"
+                                      Width="32"
+                                      x:Name="ThemeBtn"
+                                      Padding="0"
+                                      CornerRadius="16"
+                                      Background="Transparent"
+                                      BorderBrush="Transparent"
+                                      ToolTip.Tip="{Binding ThemeToolTip}">
+                            <i:Icon Value="{Binding ThemeButtonIcon}"
+                                    FontSize="14"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+                        </ToggleButton>
+                        <Button Height="32"
+                                Width="32"
+                                Padding="0"
+                                CornerRadius="16"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                ToolTip.Tip="{Binding AppVersion, StringFormat={}Current Version is: {0}}"
+                                Command="{x:Null}">
+                            <i:Icon Value="fa-solid fa-code-branch"
+                                    FontSize="14"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+                        </Button>
+                        <Button Height="32"
+                                Width="32"
+                                Padding="0"
+                                CornerRadius="16"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                ToolTip.Tip="Export session (.chemlocallink)"
+                                Click="ExportSession_Click">
+                            <i:Icon Value="fa-solid fa-file-export"
+                                    FontSize="14"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+                        </Button>
+                        <Button Height="32"
+                                Width="32"
+                                Padding="0"
+                                CornerRadius="16"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                ToolTip.Tip="Import session (.chemlocallink)"
+                                Click="ImportSession_Click">
+                            <i:Icon Value="fa-solid fa-file-import"
+                                    FontSize="14"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border Grid.Row="1"
+                    Margin="16,8,16,8"
+                    CornerRadius="12"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                <Grid RowDefinitions="Auto,*">
+                    <Border Grid.Row="0"
+                            Padding="24,16,24,8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0"
+                                       Text="Files"
+                                       FontSize="22"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+                            <StackPanel Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                        Spacing="12"
+                                        IsVisible="{Binding HasFilesDownloaded}">
+                                <Button Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                        BorderBrush="Transparent"
+                                        BorderThickness="0"
+                                        i:Attached.Icon="fa-solid fa-upload"
+                                        Width="44"
+                                        Height="44"
+                                        FontSize="18"
+                                        Command="{Binding UploadFilesCommand}"
+                                        CommandParameter="delete"
+                                        ToolTip.Tip="Upload &amp; delete locally"
+                                        CornerRadius="10"
+                                        Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+                                <Button Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                        BorderBrush="Transparent"
+                                        BorderThickness="0"
+                                        i:Attached.Icon="fa-solid fa-file"
+                                        Width="44"
+                                        Height="44"
+                                        FontSize="18"
+                                        Command="{Binding OpenFileCommand}"
+                                        ToolTip.Tip="Open file"
+                                        IsEnabled="{Binding SelectedDownloadedFileIndex, Converter={StaticResource IndextoBool}}"
+                                        CornerRadius="10"
+                                        Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+                                <Button Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                        BorderBrush="Transparent"
+                                        BorderThickness="0"
+                                        i:Attached.Icon="fa-regular fa-folder-open"
+                                        Width="44"
+                                        Height="44"
+                                        FontSize="18"
+                                        Command="{Binding OpenDownloadDirectoryCommand}"
+                                        ToolTip.Tip="Open downloads folder"
+                                        IsEnabled="{Binding SelectedDownloadedFileIndex, Converter={StaticResource IndextoBool}}"
+                                        CornerRadius="10"
+                                        Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+                                <Button Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                        BorderBrush="Transparent"
+                                        BorderThickness="0"
+                                        i:Attached.Icon="fa-solid fa-trash"
+                                        Width="44"
+                                        Height="44"
+                                        FontSize="18"
+                                        Command="{Binding DeleteSelectedFileCommand}"
+                                        ToolTip.Tip="Delete file"
+                                        IsEnabled="{Binding SelectedDownloadedFileIndex, Converter={StaticResource IndextoBool}}"
+                                        CornerRadius="10"
+                                        Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+                                <Button Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                        BorderBrush="Transparent"
+                                        BorderThickness="0"
+                                        i:Attached.Icon="fa-solid fa-eye"
+                                        Width="44"
+                                        Height="44"
+                                        FontSize="18"
+                                        Command="{Binding ScanFolderForNewFilesCommand}"
+                                        ToolTip.Tip="Scan folder for new files"
+                                        CornerRadius="10"
+                                        Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <Border Grid.Row="1"
+                            Margin="0,0,0,8">
+                        <Grid>
+                            <views:DownloadsView />
+                            <StackPanel HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="24"
+                                        IsVisible="{Binding !HasFilesDownloaded}"
+                                        Margin="48">
+                                <i:Icon Value="fa-regular fa-folder-open"
+                                        FontSize="64"
+                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                        HorizontalAlignment="Center" />
+                                <TextBlock TextWrapping="Wrap"
+                                           LineSpacing="8"
+                                           TextAlignment="Center"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontWeight="Normal"
+                                           FontSize="18"
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}">
+                                    <Run>No files available</Run>
+                                    <LineBreak />
+                                    <Run>Start by opening Chemotion files locally</Run>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+            <Border Grid.Row="2"
+                    Padding="16,8">
+                <TextBlock Text="{Binding Status}"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           FontWeight="Normal"
+                           FontSize="12"
+                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+            </Border>
+        </Grid>
+    </Border>
+</Window>

@@ -2,7 +2,7 @@
 #include "CodeDependencies.iss"
 
 #define AppName "ChemLocalLink"
-#define AppVersion "1.0.2"
+#define AppVersion "2.0.0"
 #define Protocol "chemotion"
 
 [Setup]
@@ -13,7 +13,7 @@ AppPublisherURL=https://www.scc.kit.edu/
 AppVersion={#AppVersion}
 AppComments=ChemLocalLink
 AppContact=SDM, SCC, KIT
-AppCopyright=Copyright (C) 2024 KIT Scientific Computing Center (SCC)
+AppCopyright=Copyright (C) 2025 KIT Scientific Computing Center (SCC)
 DefaultDirName={commonpf64}\{#AppName}
 DefaultGroupName={#AppName}
 OutputDir=C:/app/build/.

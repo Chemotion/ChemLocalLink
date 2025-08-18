@@ -10,41 +10,72 @@ ChemLocalLink is a cross-platform application designed to manage and process Che
 
 ## Key Features
 - **URL Handling**: Handles chemotion-specific URLs to react with Chemotion.
-- **History**: Maintains a list of downloaded Files for easy access and management.
-- **File Handling**: Allows users to download Chemotion-related files, modify them, and then upload back
-- **Notifications**: Integrated system tray and app window notifications to alert users about the status of their tasks.
+- **Structured Download Storage**: Persistent per‑origin folder layout: `<DownloadRoot>/<origin-host>/<optional/deep/link/path>/file.ext`.
+- **Download & Edit Tracking**: Checksums detect local edits; edited items flagged automatically (periodic scan).
+- **Folder Scan / Link External Files**: Scan action links any new, untracked files placed manually inside the download tree.
+- **Upload Workflow (Keep or Delete)**: Upload edited files then either mark them as kept (retain on disk) or delete them (with recursive cleanup of now-empty folders).
+- **Session Export / Import**: Portable `.chemlocallink` archive bundles transfer to another machine.
+- **Desktop Notifications**: Progress + status notifications (download / upload / errors).
+- **History & State Persistence**: `downloads.json` stored under application data, re‑hydrated on startup.
 
-## Getting Started
+## Directory & Data Layout
+Application data base path: (OS ApplicationData)/`ChemLocalLink`
 
-1. Clone the repository (`git clone https://github.com/Chemotion/ChemLocalLink.git`)
+Files created:
+- `downloads.json` – persisted list of tracked downloads (including created / duplicated / scanned files).
+- `config.json` – app config (currently only the resolved or overridden `DownloadDirectory`).
+- `theme.json` (handled internally through `JsonDataService`).
 
-2. Navigate to the project directory (`cd ChemLocalLink`)
+Default persistent download directory:
+- Windows: `%USERPROFILE%/Documents/ChemLocalLink`
+- macOS: `~/Documents/ChemLocalLink`
+- Linux: `~/Documents/ChemLocalLink` if it exists, else `~/ChemLocalLink`
 
-3. Build the project (`dotnet build`)
+Structure after processing a deep link (example):
+```
+ChemLocalLink/
+  example.chemotion.net/
+    project/123/reactions/
+      reaction_456.json
+```
 
-## Usage
+## Session Export / Import
+Archive extension: `.chemlocallink`
 
-To start the application, run after building the project.
+Contents:
+```
+manifest.json         // schemaVersion, appVersion, exportedAtUtc, fileCount
+downloads.json        // portable metadata (relative file names)
+files/                // actual files, preserving subfolder structure
+```
+Import rules:
+- Skips entries whose checksum already exists.
+- Recreates needed subdirectories relative to current download root.
+- Adds non‑duplicate files to the top of history and rebuilds groups.
 
-`dotnet run`
+## Typical Workflow
+1. User clicks `chemotion://...` link (or pastes URL) in the app.
+2. App resolves token + deep link path, downloads file to structured directory.
+3. User edits file externally (double‑click to open).
+4. App detects modification (checksum delta → IsEdited = true).
+5. User uploads (single or bulk)
+6. Optionally export session for transfer or backup.
 
 ## Contributing
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/FeatureName`)
-3. Commit your Changes (`git commit -m 'Add some FeatureName'`)
-4. Push to the Branch (`git push origin feature/FeatureName`)
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Commit: `git commit -m "feat: add your feature"`
+4. Push: `git push origin feature/your-feature`
 5. Open a Pull Request
 
-## License
+Please open issues for bugs, feature requests, or clarifications.
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## License
+MIT License – see `LICENSE` for full text.
 
 ## Contact
+- Mostafa Mekky – [mekky@kit.edu](mailto:mekky@kit.edu)
+- Issues: https://github.com/Chemotion/ChemLocalLink/issues
 
-- Mostafa Mekky - [mekky@kit.edu](mailto:mekky@kit.edu)
-- Create an issue here: [https://github.com/Chemotion/ChemLocalLink/issues](https://github.com/Chemotion/ChemLocalLink/issues)
-
-## Additional Resources
-
-[Chemotion official website](https://chemotion.net/)
+## Related
+- Chemotion: https://chemotion.net/

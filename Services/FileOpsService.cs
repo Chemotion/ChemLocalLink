@@ -24,9 +24,15 @@ public interface IFileOpsService
   Task<(string filePath, string originalName)?> DownloadFile(MainWindowViewModel mainWindowView, string token);
   Task ProcessFile(string? filePath, MainWindowViewModel mainWindowView, string originalName);
   Task<bool> UploadEditedFiles(MainWindowViewModel mainWindowView, string role = "");
+  Task<DownloadModel?> DuplicateAndRenameFile(
+    MainWindowViewModel mainWindowView,
+    DownloadModel sourceFile,
+    string newFileName
+  );
+  Task ScanFolderForNewFiles(MainWindowViewModel mainWindowView);
 }
 
-internal class FileOpsService : IFileOpsService
+internal class FileOpsService : IFileOpsService, IDisposable
 {
   private readonly HttpClient _httpClient;
   private readonly IApiService _apiService;
@@ -202,6 +208,7 @@ internal class FileOpsService : IFileOpsService
           FileSize = new FileInfo(filePath).Length.FormatBytes(),
           FileDownloadTimeStamp = File.GetLastWriteTime(filePath),
           IsEdited = false,
+          IsCreated = false,
           Exp = exp,
           Origin = originHost,
           Path = mainWindowView.DeepLinkPath,
@@ -228,6 +235,7 @@ internal class FileOpsService : IFileOpsService
           FileSize = new FileInfo(filePath).Length.FormatBytes(),
           FileDownloadTimeStamp = File.GetLastWriteTime(filePath),
           IsEdited = false,
+          IsCreated = false,
           Exp = exp,
           Origin = originHost,
           Path = mainWindowView.DeepLinkPath,
@@ -594,6 +602,282 @@ internal class FileOpsService : IFileOpsService
       }
     }
     catch { }
+  }
+
+  #endregion
+
+  #region File Creation and Scanning
+
+  public async Task<DownloadModel?> DuplicateAndRenameFile(
+    MainWindowViewModel mainWindowView,
+    DownloadModel sourceFile,
+    string newFileName
+  )
+  {
+    try
+    {
+      if (string.IsNullOrWhiteSpace(newFileName) || newFileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+      {
+        await _notificationService.ShowNotificationAsync("Invalid filename provided.");
+        return null;
+      }
+
+      var sourceDir = Path.GetDirectoryName(sourceFile.FilePath);
+      if (sourceDir == null || !File.Exists(sourceFile.FilePath))
+      {
+        await _notificationService.ShowNotificationAsync("Source file not found.");
+        return null;
+      }
+
+      var newFilePath = Path.Combine(sourceDir, newFileName);
+
+      var counter = 1;
+      var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(newFileName);
+      var fileExtension = Path.GetExtension(newFileName);
+
+      while (File.Exists(newFilePath))
+      {
+        var numberedFileName = $"{fileNameWithoutExtension}-{counter}{fileExtension}";
+        newFilePath = Path.Combine(sourceDir, numberedFileName);
+        counter++;
+      }
+
+      File.Copy(sourceFile.FilePath, newFilePath);
+
+      var random = new Random(2345);
+      var newId =
+        mainWindowView.DownloadedFiles?.Any() ?? false
+          ? mainWindowView.DownloadedFiles.Max(f => f.FileId) + 1
+          : random.NextInt64(10000, 999999);
+
+      var newDownload = new DownloadModel()
+      {
+        FileId = newId,
+        FileName = Path.GetFileName(newFilePath),
+        OriginalFileName = sourceFile.OriginalFileName,
+        FilePath = newFilePath,
+        FileSumOnDownload = newFilePath.FileCheckSum(),
+        FileSize = new FileInfo(newFilePath).Length.FormatBytes(),
+        FileDownloadTimeStamp = DateTime.Now,
+        IsEdited = false,
+        IsCreated = true,
+        IsKept = false,
+        Exp = sourceFile.Exp,
+        Origin = sourceFile.Origin,
+        Path = sourceFile.Path,
+        Token = sourceFile.Token,
+        SourceUrl = sourceFile.SourceUrl
+      };
+
+      var appDataPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "ChemLocalLink"
+      );
+      Directory.CreateDirectory(appDataPath);
+      var jsonFilePath = Path.Combine(appDataPath, "downloads.json");
+
+      var jsonObject = new
+      {
+        FileId = newId,
+        FileName = newDownload.FileName,
+        OriginalFileName = newDownload.OriginalFileName,
+        FilePath = newDownload.FilePath,
+        FileSumOnDownload = newDownload.FileSumOnDownload,
+        FileSize = newDownload.FileSize,
+        FileDownloadTimeStamp = newDownload.FileDownloadTimeStamp,
+        IsEdited = newDownload.IsEdited,
+        IsCreated = newDownload.IsCreated,
+        IsKept = newDownload.IsKept,
+        Exp = newDownload.Exp,
+        Origin = newDownload.Origin,
+        Path = newDownload.Path,
+        Token = newDownload.Token,
+        SourceUrl = newDownload.SourceUrl
+      };
+
+      _jsonDataService.AppendJsonToFile(jsonFilePath, jsonObject);
+
+      Dispatcher.UIThread.Post(() =>
+      {
+        mainWindowView.DownloadedFiles?.Insert(0, newDownload);
+        mainWindowView.HasFilesDownloaded = (mainWindowView.DownloadedFiles?.Count ?? 0) > 0;
+        mainWindowView.RebuildGroups();
+      });
+
+      await _notificationService.ShowNotificationAsync($"File duplicated as '{Path.GetFileName(newFilePath)}'");
+      return newDownload;
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine($"Error duplicating file: {ex.Message}");
+      await _notificationService.ShowNotificationAsync("Error duplicating file.");
+      return null;
+    }
+  }
+
+  public async Task ScanFolderForNewFiles(MainWindowViewModel mainWindowView)
+  {
+    try
+    {
+      var downloadRoot = _pathService.GetDownloadDirectory();
+      if (!Directory.Exists(downloadRoot))
+      {
+        await _notificationService.ShowNotificationAsync("Download directory not found.");
+        return;
+      }
+
+      var newFilesAdded = 0;
+      var filesRemoved = 0;
+      var allFiles = Directory.GetFiles(downloadRoot, "*.*", SearchOption.AllDirectories);
+      var trackedFilePaths =
+        mainWindowView.DownloadedFiles?.Select(f => f.FilePath).ToHashSet() ?? new HashSet<string>();
+
+      var filesToRemove = new List<DownloadModel>();
+      if (mainWindowView.DownloadedFiles != null)
+      {
+        foreach (var trackedFile in mainWindowView.DownloadedFiles)
+        {
+          if (!File.Exists(trackedFile.FilePath))
+          {
+            filesToRemove.Add(trackedFile);
+          }
+        }
+      }
+
+      foreach (var fileToRemove in filesToRemove)
+      {
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+          mainWindowView.DownloadedFiles?.Remove(fileToRemove);
+          mainWindowView.HasFilesDownloaded = (mainWindowView.DownloadedFiles?.Count ?? 0) > 0;
+        });
+        filesRemoved++;
+      }
+
+      trackedFilePaths = mainWindowView.DownloadedFiles?.Select(f => f.FilePath).ToHashSet() ?? new HashSet<string>();
+
+      foreach (var filePath in allFiles)
+      {
+        if (!trackedFilePaths.Contains(filePath))
+        {
+          var directory = Path.GetDirectoryName(filePath);
+          var mostRecentFile = mainWindowView
+            .DownloadedFiles?.Where(f => Path.GetDirectoryName(f.FilePath) == directory)
+            .OrderByDescending(f => f.FileDownloadTimeStamp)
+            .FirstOrDefault();
+
+          if (mostRecentFile != null)
+          {
+            await LinkUntracked(filePath, mostRecentFile, mainWindowView);
+            newFilesAdded++;
+          }
+        }
+      }
+
+      await _jsonDataService.WriteDataToAppData(mainWindowView);
+
+      Dispatcher.UIThread.Post(() =>
+      {
+        mainWindowView.RebuildGroups();
+      });
+
+      var statusMessage = $"Scan complete. {newFilesAdded} new files added";
+      if (filesRemoved > 0)
+      {
+        statusMessage += $", {filesRemoved} missing files removed";
+      }
+      statusMessage += ".";
+
+      await _notificationService.ShowNotificationAsync(statusMessage);
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine($"Error scanning folder: {ex.Message}");
+      await _notificationService.ShowNotificationAsync("Error scanning folder for new files.");
+    }
+  }
+
+  private async Task LinkUntracked(string filePath, DownloadModel parentFile, MainWindowViewModel mainWindowView)
+  {
+    try
+    {
+      var random = new Random(2345);
+      var newId =
+        mainWindowView.DownloadedFiles?.Any() ?? false
+          ? mainWindowView.DownloadedFiles.Max(f => f.FileId) + 1
+          : random.NextInt64(10000, 999999);
+
+      var newDownload = new DownloadModel()
+      {
+        FileId = newId,
+        FileName = Path.GetFileName(filePath),
+        OriginalFileName = Path.GetFileName(filePath),
+        FilePath = filePath,
+        FileSumOnDownload = filePath.FileCheckSum(),
+        FileSize = new FileInfo(filePath).Length.FormatBytes(),
+        FileDownloadTimeStamp = File.GetLastWriteTime(filePath),
+        IsEdited = false,
+        IsCreated = true, // Mark as created since it appeared outside the app
+        IsKept = false,
+        Exp = parentFile.Exp,
+        Origin = parentFile.Origin,
+        Path = parentFile.Path,
+        Token = parentFile.Token,
+        SourceUrl = parentFile.SourceUrl
+      };
+
+      var appDataPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "ChemLocalLink"
+      );
+      Directory.CreateDirectory(appDataPath);
+      var jsonFilePath = Path.Combine(appDataPath, "downloads.json");
+
+      var jsonObject = new
+      {
+        FileId = newId,
+        FileName = newDownload.FileName,
+        OriginalFileName = newDownload.OriginalFileName,
+        FilePath = newDownload.FilePath,
+        FileSumOnDownload = newDownload.FileSumOnDownload,
+        FileSize = newDownload.FileSize,
+        FileDownloadTimeStamp = newDownload.FileDownloadTimeStamp,
+        IsEdited = newDownload.IsEdited,
+        IsCreated = newDownload.IsCreated,
+        IsKept = newDownload.IsKept,
+        Exp = newDownload.Exp,
+        Origin = newDownload.Origin,
+        Path = newDownload.Path,
+        Token = newDownload.Token,
+        SourceUrl = newDownload.SourceUrl
+      };
+
+      _jsonDataService.AppendJsonToFile(jsonFilePath, jsonObject);
+
+      await Dispatcher.UIThread.InvokeAsync(() =>
+      {
+        mainWindowView.DownloadedFiles?.Insert(0, newDownload);
+        mainWindowView.HasFilesDownloaded = (mainWindowView.DownloadedFiles?.Count ?? 0) > 0;
+        mainWindowView.RebuildGroups();
+      });
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine($"Error linking untracked file: {ex.Message}");
+    }
+  }
+
+  #endregion
+
+  #region Helper Methods
+
+  #endregion
+
+  #region IDisposable Implementation
+
+  public void Dispose()
+  {
+    // Cleanup resources if needed
   }
 
   #endregion

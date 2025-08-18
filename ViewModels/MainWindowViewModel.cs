@@ -376,6 +376,30 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     SelectedDownloadedFile = file;
   }
 
+  [RelayCommand]
+  public async Task DuplicateAndRenameFile()
+  {
+    if (SelectedDownloadedFile == null)
+      return;
+
+    var originalName = Path.GetFileNameWithoutExtension(SelectedDownloadedFile.FileName);
+    var extension = Path.GetExtension(SelectedDownloadedFile.FileName);
+    var suggestedName = $"{originalName}_copy{extension}";
+
+    var result = await _fileOpsService.DuplicateAndRenameFile(this, SelectedDownloadedFile, suggestedName);
+
+    if (result != null)
+    {
+      Status = $"File duplicated successfully as '{result.FileName}'";
+    }
+  }
+
+  [RelayCommand]
+  public async Task ScanFolderForNewFiles()
+  {
+    await _fileOpsService.ScanFolderForNewFiles(this);
+  }
+
   partial void OnStatusChanged(string? oldValue, string? newValue)
   {
     Task.Run(async () =>

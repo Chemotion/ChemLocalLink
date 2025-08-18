@@ -72,6 +72,7 @@ internal class JsonDataService : IJsonDataService
         d.FileSize,
         d.FileDownloadTimeStamp,
         d.IsEdited,
+        d.IsCreated,
         d.Exp,
         d.Origin,
         d.Path,

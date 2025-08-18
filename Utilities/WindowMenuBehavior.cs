@@ -88,6 +88,9 @@ public class WindowMenuBehavior : Behavior<MenuItem>
           case "deleteFile":
             viewModel?.DeleteSelectedFile();
             break;
+          case "duplicateFile":
+            await viewModel!.DuplicateAndRenameFile();
+            break;
           case "openFile":
             viewModel?.OpenFile();
             break;

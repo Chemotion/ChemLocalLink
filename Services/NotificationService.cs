@@ -76,8 +76,7 @@ internal class NotificationService : INotificationService
         || Environment.OSVersion.Platform == PlatformID.Unix
       )
       {
-        var resolvedBody =
-          body ?? (_bodyMessages.ContainsKey(title) ? _bodyMessages[title] : "Unexpected behavior, please report.");
+        var resolvedBody = body ?? (_bodyMessages.ContainsKey(title) ? _bodyMessages[title] : "");
 
         var notification = new Notification
         {

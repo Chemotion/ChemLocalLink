@@ -27,7 +27,8 @@
                     CornerRadius="10"
                     MinHeight="64"
                     Margin="-8,0,0,0"
-                    ToolTip.Tip="{Binding FilePath}">
+                    ToolTip.Tip="{Binding FilePath}"
+                    Classes="item-border">
                 <Border.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Upload &amp; delete locally">
@@ -44,6 +45,15 @@
                                                                Commands="uploadnkeep" />
                             </Interaction.Behaviors>
                         </MenuItem>
+                        <Separator />
+                        <MenuItem Header="Duplicate file">
+                            <Interaction.Behaviors>
+                                <extensions:WindowMenuBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
+                                                               FileModel="{Binding}"
+                                                               Commands="duplicateFile" />
+                            </Interaction.Behaviors>
+                        </MenuItem>
+                        <Separator />
                         <MenuItem Header="Delete file locally">
                             <Interaction.Behaviors>
                                 <extensions:WindowMenuBehavior ViewModel="{Binding $parent[UserControl].DataContext}"
@@ -93,6 +103,7 @@
                         <Border Background="{DynamicResource SystemAccentColorLight2}"
                                 CornerRadius="10"
                                 Padding="8,2"
+                                Classes="badge-border"
                                 IsVisible="{Binding IsEdited}">
                             <StackPanel Orientation="Horizontal"
                                         Spacing="4">
@@ -107,6 +118,7 @@
                         <Border Background="{DynamicResource SystemControlForegroundBaseMediumBrush}"
                                 CornerRadius="10"
                                 Padding="8,2"
+                                Classes="badge-border"
                                 IsVisible="{Binding IsKept}">
                             <StackPanel Orientation="Horizontal"
                                         Spacing="4">
@@ -114,6 +126,21 @@
                                                Width="10"
                                                Height="10" />
                                 <TextBlock Text="Kept"
+                                           FontSize="10"
+                                           Foreground="White" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{DynamicResource SystemAccentColorDark1}"
+                                CornerRadius="10"
+                                Padding="8,2"
+                                Classes="badge-border"
+                                IsVisible="{Binding IsCreated}">
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="4">
+                                <avalonia:Icon Value="fa-solid fa-plus"
+                                               Width="10"
+                                               Height="10" />
+                                <TextBlock Text="Created"
                                            FontSize="10"
                                            Foreground="White" />
                             </StackPanel>
@@ -150,17 +177,23 @@
                             <TextBlock Text="•"
                                        FontSize="11"
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
-                            <StackPanel Orientation="Horizontal"
-                                        Spacing="4"
-                                        ToolTip.Tip="{Binding Exp, Converter={StaticResource DateToString}}">
-                                <Ellipse Width="8"
-                                         Height="8"
-                                         IsVisible="{Binding !IsKept}"
-                                         Fill="{Binding Exp, Converter={StaticResource DateToString}, ConverterParameter={Binding IsKept}}" />
-                                <TextBlock Text="Expires"
-                                           FontSize="11"
-                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
-                            </StackPanel>
+                            <Border Background="{Binding Exp, Converter={StaticResource DateToString}}"
+                                    CornerRadius="10"
+                                    Padding="6,2"
+                                    IsVisible="{Binding !IsKept}"
+                                    ToolTip.Tip="{Binding Exp, Converter={StaticResource DateToString}, ConverterParameter=tooltip}">
+                                <StackPanel Orientation="Horizontal"
+                                            Spacing="4">
+                                    <avalonia:Icon Value="fa-solid fa-clock"
+                                                   Width="10"
+                                                   Height="10"
+                                                   Foreground="White" />
+                                    <TextBlock Text="{Binding Exp, Converter={StaticResource DateToString}, ConverterParameter=short}"
+                                               FontSize="10"
+                                               FontWeight="Medium"
+                                               Foreground="White" />
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                         <TextBlock Grid.Column="1"
                                    Text="{Binding FileDownloadTimeStamp, Converter={StaticResource DateToString}}"
@@ -248,13 +281,33 @@
                 <Setter Property="BorderBrush"
                         Value="Transparent" />
             </Style>
-            <Style Selector="TreeViewItem Border">
+            <Style Selector="TreeViewItem Border.item-border">
                 <Setter Property="Background"
                         Value="Transparent" />
             </Style>
-            <Style Selector="TreeViewItem:pointerover Border">
+            <Style Selector="TreeViewItem:pointerover Border.item-border">
                 <Setter Property="Background"
                         Value="Transparent" />
+            </Style>
+            <Style Selector="Border.badge-border">
+                <Setter Property="Background"
+                        Value="{Binding RelativeSource={RelativeSource Self}, Path=Background}" />
+            </Style>
+            <Style Selector="Border.folder-border">
+                <Setter Property="Background"
+                        Value="Transparent" />
+            </Style>
+            <Style Selector="Border.divider-border">
+                <Setter Property="Background"
+                        Value="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+            </Style>
+            <Style Selector="ToolTip">
+                <Setter Property="Background"
+                        Value="{DynamicResource ToolTipBackground}" />
+                <Setter Property="BorderBrush"
+                        Value="{DynamicResource ToolTipBorderBrush}" />
+                <Setter Property="Foreground"
+                        Value="{DynamicResource ToolTipForeground}" />
             </Style>
         </TreeView.Styles>
         <TreeView.ItemTemplate>
@@ -293,13 +346,14 @@
                             Padding="2,4"
                             CornerRadius="6"
                             Margin="0,2"
+                            Classes="folder-border"
                             IsHitTestVisible="False">
                         <Border.Styles>
-                            <Style Selector="Border">
+                            <Style Selector="Border.folder-border">
                                 <Setter Property="Background"
                                         Value="Transparent" />
                             </Style>
-                            <Style Selector="Border:pointerover">
+                            <Style Selector="Border.folder-border:pointerover">
                                 <Setter Property="Background"
                                         Value="Transparent" />
                             </Style>
@@ -310,6 +364,7 @@
                                     Height="20"
                                     Background="{DynamicResource SystemControlForegroundBaseMediumBrush}"
                                     Opacity="0.3"
+                                    Classes="divider-border"
                                     Margin="4,0" />
                             <avalonia:Icon Value="fa-solid fa-folder-open"
                                            Width="16"

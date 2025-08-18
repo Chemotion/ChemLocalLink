@@ -70,6 +70,7 @@ internal class SessionService : ISessionService
           FileSize = d.FileSize,
           FileSumOnDownload = d.FileSumOnDownload,
           IsEdited = d.IsEdited,
+          IsCreated = d.IsCreated,
           IsKept = d.IsKept,
           Exp = d.Exp,
           Origin = d.Origin,
@@ -128,6 +129,7 @@ internal class SessionService : ISessionService
     public string? FileSize { get; set; }
     public string? FileSumOnDownload { get; set; }
     public bool IsEdited { get; set; }
+    public bool IsCreated { get; set; }
     public bool IsKept { get; set; }
     public long Exp { get; set; }
     public string Origin { get; set; } = string.Empty;
@@ -229,6 +231,7 @@ internal class SessionService : ISessionService
             FileSize = new FileInfo(destPath).Length.FormatBytes(),
             FileSumOnDownload = pd.FileSumOnDownload,
             IsEdited = false,
+            IsCreated = pd.IsCreated,
             IsKept = pd.IsKept,
             Exp = pd.Exp,
             Origin = pd.Origin,

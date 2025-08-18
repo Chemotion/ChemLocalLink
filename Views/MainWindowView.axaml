@@ -163,6 +163,17 @@
                                         IsEnabled="{Binding SelectedDownloadedFileIndex, Converter={StaticResource IndextoBool}}"
                                         CornerRadius="10"
                                         Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+                                <Button Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+                                        BorderBrush="Transparent"
+                                        BorderThickness="0"
+                                        i:Attached.Icon="fa-solid fa-eye"
+                                        Width="44"
+                                        Height="44"
+                                        FontSize="18"
+                                        Command="{Binding ScanFolderForNewFilesCommand}"
+                                        ToolTip.Tip="Scan folder for new files"
+                                        CornerRadius="10"
+                                        Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
                             </StackPanel>
                         </Grid>
                     </Border>

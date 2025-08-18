@@ -124,7 +124,8 @@ public class WindowService : IWindowService
                 // ensure new fields exist for legacy entries
                 if (download.SourceUrl == null && !string.IsNullOrWhiteSpace(mainWindowView.Url))
                   download.SourceUrl = mainWindowView.Url;
-                // token left null for legacy entries
+                if (download.FileDownloadTimeStamp == default)
+                  download.FileDownloadTimeStamp = File.GetLastWriteTime(download.FilePath);
 
                 mainWindowView.DownloadedFiles.Insert(0, download);
               }

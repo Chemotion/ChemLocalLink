@@ -31,5 +31,8 @@ public partial class DownloadModel : ObservableObject
   private bool _isKept;
 
   [ObservableProperty]
+  private bool _isCreated;
+
+  [ObservableProperty]
   private long _exp;
 }

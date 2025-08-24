@@ -2,7 +2,7 @@
 #include "CodeDependencies.iss"
 
 #define AppName "ChemLocalLink"
-#define AppVersion "2.0.0"
+#define AppVersion "2.0.1"
 #define Protocol "chemotion"
 
 [Setup]

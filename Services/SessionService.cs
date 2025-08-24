@@ -1,6 +1,7 @@
 /// <summary>
 /// Handles exporting and importing session data (.chemlocallink)
 /// </summary>
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -46,7 +47,7 @@ internal class SessionService : ISessionService
       var downloads = vm.DownloadedFiles.ToList();
       var existingFiles = downloads
         .Where(d => !string.IsNullOrWhiteSpace(d.FilePath) && File.Exists(d.FilePath))
-        .Where(d => !d.FilePath.EndsWith("~")) // exclude backup files
+        .Where(d => !d.FilePath.EndsWith("~"))
         .ToList();
 
       // manifest
@@ -185,13 +186,12 @@ internal class SessionService : ISessionService
         try
         {
           if (!string.IsNullOrWhiteSpace(pd.FileSumOnDownload) && existingChecksums.Contains(pd.FileSumOnDownload))
-            continue; // skip duplicate by checksum
-
+            continue;
           var sourceFileEntry = zip.GetEntry($"files/{pd.FileRelativeName}");
           if (sourceFileEntry == null)
-            continue; // missing file
+            continue;
 
-          // Create the target path including folder structure
+          // create the target path including folder structure
           string destPath;
           if (!string.IsNullOrWhiteSpace(pd.Path))
           {
@@ -220,7 +220,6 @@ internal class SessionService : ISessionService
 
           var finalFileName = Path.GetFileName(destPath);
 
-          // create new model
           var model = new DownloadModel
           {
             FileId = pd.FileId == 0 ? rand.NextInt64(10000, 999999) : pd.FileId,

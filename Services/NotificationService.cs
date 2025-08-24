@@ -20,7 +20,6 @@ internal class NotificationService : INotificationService
 {
   private readonly INotificationManager? _notificationManager;
 
-  // Constants for feedback messages
   public static class Messages
   {
     public const string FileKept = "Kept files can not be uploaded!";

@@ -1,6 +1,7 @@
 /// <summary>
 /// Provides cross-platform paths for downloads and configuration, and handles migration.
 /// </summary>
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -73,7 +74,7 @@ internal class PathService : IPathService
       return cfg.DownloadDirectory!;
     }
 
-    // Determine default
+    // determine default
     string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     string documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     string defaultDir;
@@ -87,7 +88,7 @@ internal class PathService : IPathService
       // macOS documents folder
       defaultDir = Path.Combine(documents, "ChemLocalLink");
     }
-    else // Linux / others
+    else
     {
       if (!string.IsNullOrWhiteSpace(documents) && Directory.Exists(documents))
       {
@@ -132,7 +133,7 @@ internal class PathService : IPathService
             continue;
           var full = d.FilePath;
           if (!File.Exists(full))
-            continue; // already removed
+            continue;
 
           // only migrate if inside legacy folder
           if (!Path.GetFullPath(full).StartsWith(Path.GetFullPath(legacyDir), StringComparison.OrdinalIgnoreCase))

@@ -48,7 +48,7 @@ public class FileExtensionToIconConverter : IValueConverter
     Add(Blue, "fa-solid fa-file-code", ".ts", ".xaml", ".axaml");
     Add(Indigo, "fa-brands fa-python", ".py");
     Add(Purple, "fa-solid fa-file-code", ".cs", ".cpp", ".c", ".h", ".java", ".go", ".rb", ".swift", ".kt");
-    Add(Orange, "fa-solid fa-brackets-curly", ".json", ".xml");
+    Add(Orange, "fa-solid fa-code", ".json", ".xml");
     Add(Gray, "fa-solid fa-file-lines", ".yml", ".yaml", ".ini", ".cfg", ".conf");
 
     Add(Purple, "fa-solid fa-file-image", ".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif", ".svg", ".webp", ".ico");

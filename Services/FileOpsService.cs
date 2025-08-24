@@ -817,7 +817,7 @@ internal class FileOpsService : IFileOpsService, IDisposable
         FileSize = new FileInfo(filePath).Length.FormatBytes(),
         FileDownloadTimeStamp = File.GetLastWriteTime(filePath),
         IsEdited = false,
-        IsCreated = true, // Mark as created since it appeared outside the app
+        IsCreated = true,
         IsKept = false,
         Exp = parentFile.Exp,
         Origin = parentFile.Origin,
@@ -875,10 +875,7 @@ internal class FileOpsService : IFileOpsService, IDisposable
 
   #region IDisposable Implementation
 
-  public void Dispose()
-  {
-    // Cleanup resources if needed
-  }
+  public void Dispose() { }
 
   #endregion
 }

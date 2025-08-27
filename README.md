@@ -1,5 +1,6 @@
 
 # ChemLocalLink
+[![GitHub all releases](https://img.shields.io/github/downloads/Chemotion/ChemLocalLink/total)](https://github.com/Chemotion/ChemLocalLink/releases/latest)
 [![License](https://img.shields.io/badge/License-MIT%202.0-blue.svg)](https://opensource.org/licenses/MIT)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-blue.svg)](https://github.com/Chemotion/ChemLocalLink/graphs/commit-activity)
 [![GitHub issues](https://img.shields.io/github/issues/Chemotion/ChemLocalLink.svg)](https://github.com/Chemotion/ChemLocalLink/issues)

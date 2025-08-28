@@ -19,13 +19,65 @@ ChemLocalLink is a cross-platform application designed to manage and process Che
 - **Desktop Notifications**: Progress + status notifications (download / upload / errors).
 - **History & State Persistence**: `downloads.json` stored under application data, re‑hydrated on startup.
 
+## Installation
+
+### Windows
+
+#### Prerequisites
+- Windows 10 or later
+- .NET 8.0 Desktop Runtime
+
+#### Download and Install
+1. **Download the latest installer** from the [Releases page](https://github.com/Chemotion/ChemLocalLink/releases/latest)
+   - Look for `ChemLocalLink_x.x.x.exe`
+
+2. **Install .NET 8.0 Desktop Runtime** (if not already installed)
+   - The installer will check and prompt you to install it if needed
+   - Or download directly from [Microsoft](https://dotnet.microsoft.com/download/dotnet/8.0)
+
+3. **Run the installer**
+   - Double-click the downloaded `.exe` file
+   - Follow the installation wizard
+   - A desktop shortcut and start menu entry will be created
+
+
+### Linux (Debian/Ubuntu)
+
+#### Prerequisites
+- Debian 11+ or Ubuntu 20.04+
+- No additional runtime installation required (self-contained package)
+
+#### Download and Install
+1. **Download the latest .deb package** from the [Releases page](https://github.com/Chemotion/ChemLocalLink/releases/latest)
+   - For x64 systems: `chemlocallink_x.x.x_amd64.deb`
+   - For ARM64 systems: `chemlocallink_x.x.x_arm64.deb`
+
+2. **Install the package**
+
+   **Using apt (recommended)**
+   ```bash
+   sudo apt update
+   sudo apt install ./chemlocallink_x.x.x_amd64.deb
+   ```
+  - The application will be available in your applications menu
+  - You can launch from terminal: `chemlocallink`
+
+#### System Integration
+The Debian package automatically:
+- Installs the application to `/usr/lib/ChemLocalLink/`
+- Creates a launcher script in `/usr/bin/ChemLocalLink`
+- Registers the `chemotion://` URL protocol handler
+- Adds application icon to system icon themes
+- Updates desktop database and MIME associations
+
+
 ## Directory & Data Layout
 Application data base path: (OS ApplicationData)/`ChemLocalLink`
 
 Files created:
-- `downloads.json` – persisted list of tracked downloads (including created / duplicated / scanned files).
-- `config.json` – app config (currently only the resolved or overridden `DownloadDirectory`).
-- `theme.json` (handled internally through `JsonDataService`).
+- `downloads.json` – persisted list of tracked downloads.
+- `config.json` – app config.
+- `theme.json` – theme config.
 
 Default persistent download directory:
 - Windows: `%USERPROFILE%/Documents/ChemLocalLink`
@@ -35,7 +87,7 @@ Default persistent download directory:
 Structure after processing a deep link (example):
 ```
 ChemLocalLink/
-  example.chemotion.net/
+  Origin/
     project/123/reactions/
       reaction_456.json
 ```
@@ -78,5 +130,5 @@ MIT License – see `LICENSE` for full text.
 - Mostafa Mekky – [mekky@kit.edu](mailto:mekky@kit.edu)
 - Issues: https://github.com/Chemotion/ChemLocalLink/issues
 
-## Related
-- Chemotion: https://chemotion.net/
+## Chemotion
+- https://chemotion.net/

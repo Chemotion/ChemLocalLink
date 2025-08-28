@@ -5,7 +5,7 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-blue.svg)](https://github.com/Chemotion/ChemLocalLink/graphs/commit-activity)
 [![GitHub issues](https://img.shields.io/github/issues/Chemotion/ChemLocalLink.svg)](https://github.com/Chemotion/ChemLocalLink/issues)
 [![Continuous Integration](https://github.com/Chemotion/ChemLocalLink/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Chemotion/ChemLocalLink/actions/workflows/dotnet.yml)
-[![Latest Release](https://github.com/Chemotion/ChemLocalLink/actions/workflows/dotnet_innosetup.yml/badge.svg)](https://github.com/Chemotion/ChemLocalLink/actions/workflows/dotnet_innosetup.yml)
+[![Latest Release](https://github.com/Chemotion/ChemLocalLink/actions/workflows/release.yml/badge.svg)](https://github.com/Chemotion/ChemLocalLink/actions/workflows/release.yml)
 
 ChemLocalLink is a cross-platform application designed to manage and process Chemotion Files.
 

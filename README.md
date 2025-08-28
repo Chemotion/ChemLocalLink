@@ -41,23 +41,23 @@ ChemLocalLink is a cross-platform application designed to manage and process Che
    - A desktop shortcut and start menu entry will be created
 
 
-### Linux (Debian/Ubuntu)
+### Linux (Debian-based)
 
 #### Prerequisites
-- Debian 11+ or Ubuntu 20.04+
+- Debian-based System
 - No additional runtime installation required (self-contained package)
 
 #### Download and Install
 1. **Download the latest .deb package** from the [Releases page](https://github.com/Chemotion/ChemLocalLink/releases/latest)
-   - For x64 systems: `chemlocallink_x.x.x_amd64.deb`
-   - For ARM64 systems: `chemlocallink_x.x.x_arm64.deb`
+   - For x64 systems: `ChemLocalLink_x.x.x_amd64.deb`
+   - For ARM64 systems: `ChemLocalLink_x.x.x_arm64.deb`
 
 2. **Install the package**
 
    **Using apt (recommended)**
    ```bash
    sudo apt update
-   sudo apt install ./chemlocallink_x.x.x_amd64.deb
+   sudo apt install ./ChemLocalLink_x.x.x_amd64.deb
    ```
   - The application will be available in your applications menu
   - You can launch from terminal: `chemlocallink`
@@ -70,6 +70,20 @@ The Debian package automatically:
 - Adds application icon to system icon themes
 - Updates desktop database and MIME associations
 
+## Uninstallation
+
+### Windows
+
+- Open Control Panel
+- Go to Programs > Programs and Features
+- Find "ChemLocalLink" in the list
+- Right-click and select "Uninstall"
+
+### Linux (Debian-based)
+
+```bash
+sudo apt remove chemlocallink
+```
 
 ## Directory & Data Layout
 Application data base path: (OS ApplicationData)/`ChemLocalLink`
